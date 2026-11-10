@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTAYKIT IT INV - Inventory Management</title>
+    <!-- Tailwind CSS for Design -->
+    <script src="https://jsdelivr.net"></script>
+    <!-- QRCode.js Library -->
+    <script src="https://cloudflare.com"></script>
+</head>
+<body class="bg-gray-100 font-sans p-6">
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white p-4 rounded-t-lg shadow-md flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-wide">KTAYKIT IT INV</h1>
+            <span class="text-sm bg-blue-700 px-3 py-1 rounded">Live Database Connected</span>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            
+            <!-- Data Entry Form Side -->
+            <div class="bg-white p-6 rounded-lg shadow-md h-fit">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Item Entry Form</h2>
+                <form id="inventoryForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Sr. No</label>
+                        <input type="number" id="srNo" required class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Item Code</label>
+                        <input type="text" id="itemCode" required class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Item Name</label>
+                        <input type="text" id="itemName" required class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Description</label>
+                        <textarea id="description" rows="2" class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Department</label>
+                        <input type="text" id="department" required class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Location</label>
+                        <input type="text" id="location" required class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Status</label>
+                        <select id="status" class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Maintenance">Maintenance</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded shadow transition">Save to Cloud & Generate QR</button>
+                </form>
+            </div>
+
+            <!-- Inventory List and QR View Side -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- QR Code Viewer Panel -->
+                <div id="qrPanel" class="bg-white p-6 rounded-lg shadow-md hidden flex flex-col items-center justify-center text-center">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2" id="qrTitle">Generated QR Code</h3>
+                    <div id="qrcode" class="p-2 bg-white border mb-4"></div>
+                    <p class="text-sm text-gray-500 mb-2" id="qrLinkText"></p>
+                    <button onclick="window.print()" class="bg-gray-800 text-white text-xs px-4 py-2 rounded hover:bg-gray-900">Print QR Code</button>
+                </div>
+
+                <!-- Live Data Table -->
+                <div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Stored Inventory Items</h2>
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700 border-b">
+                                <th class="p-3">Sr. No</th>
+                                <th class="p-3">Code</th>
+                                <th class="p-3">Item Name</th>
+                                <th class="p-3">Dept / Location</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody" class="divide-y divide-gray-200">
+                            <!-- Live database rows will load here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Firebase SDK Modules -->
+    <script type="module">
+        import { initializeApp } from "https://gstatic.com";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://gstatic.com";
+
+        // --- আপনার Firebase Config এখানে বসান ---
+      const firebaseConfig = {
+  apiKey: "AIzaSyAlE4LI7njD-0eMU5dYBY8OXTirIOQomZY",
+  authDomain: "ktaykit-inv.firebaseapp.com",
+  projectId: "ktaykit-inv",
+  storageBucket: "ktaykit-inv.firebasestorage.app",
+  messagingSenderId: "868506335870",
+  appId: "1:868506335870:web:a2d40d3175a4068ea3f62f",
+  measurementId: "G-XWLKHBBKM0"
+};
+
+// Initialize Firebase
+
+        };
+
+        // Firebase ইনিশিয়ালাইজেশন
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const inventoryCollection = collection(db, "items");
+
+        // QR কোড দেখানোর ভ্যারিয়েবল
+        const qrContainer = document.getElementById("qrcode");
+        let qrcodeInstance = new QRCode(qrContainer, { width: 150, height: 150 });
+
+        // ১. ডাটাবেসে নতুন ডাটা সেভ করা
+        document.getElementById("inventoryForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const itemData = {
+                srNo: parseInt(document.getElementById("srNo").value),
+                itemCode: document.getElementById("itemCode").value,
+                itemName: document.getElementById("itemName").value,
+                description: document.getElementById("description").value,
+                department: document.getElementById("department").value,
+                location: document.getElementById("location").value,
+                status: document.getElementById("status").value,
+                timestamp: new Date()
+            };
+
+            try {
+                // cloud firestore এ সেভ হচ্ছে
+                await addDoc(inventoryCollection, itemData);
+                document.getElementById("inventoryForm").reset();
+                alert("Data Successfully Saved to Cloud Database!");
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert("Failed to save data.");
+            }
+        });
+
+        // ২. ডাটাবেস থেকে রিয়েল-টাইমে ডাটা টেবিলে দেখানো
+        onSnapshot(inventoryCollection, (snapshot) => {
+            const tableBody = document.getElementById("inventoryTableBody");
+            tableBody.innerHTML = "";
+
+            // ডাটাগুলোকে Sr. No অনুযায়ী সাজানো হচ্ছে
+            const docs = [];
+            snapshot.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
+            docs.sort((a, b) => a.srNo - b.srNo);
+
+            docs.forEach((item) => {
+                const row = document.createElement("tr");
+                row.className = "hover:bg-gray-50 transition";
+                
+                let statusColor = "bg-green-100 text-green-800";
+                if(item.status === "Inactive") statusColor = "bg-red-100 text-red-800";
+                if(item.status === "Maintenance") statusColor = "bg-yellow-100 text-yellow-800";
+
+                row.innerHTML = `
+                    <td class="p-3 font-medium text-gray-700">${item.srNo}</td>
+                    <td class="p-3 text-gray-600 font-mono">${item.itemCode}</td>
+                    <td class="p-3 text-gray-900 font-semibold">${item.itemName}</td>
+                    <td class="p-3 text-gray-500">${item.department} <br> <span class="text-xs text-gray-400">${item.location}</span></td>
+                    <td class="p-3"><span class="px-2 py-1 text-xs rounded-full ${statusColor}">${item.status}</span></td>
+                    <td class="p-3 text-center">
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded shadow scan-qr-btn" 
+                                data-id="${item.id}" data-name="${item.itemName}">
+                            View/Generate QR
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // প্রতিটি বাটনে QR কোড জেনারেট করার লজিক যুক্ত করা
+            document.querySelectorAll(".scan-qr-btn").forEach(button => {
+                button.addEventListener("click", (e) => {
