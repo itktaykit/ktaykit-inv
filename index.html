@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KTAYKIT IT INV - Property of Ktaykit Fast Food</title>
-    <!-- QR Code Library -->
+    <!-- সঠিক QR Code Library লিংক -->
     <script src="https://cloudflare.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -173,25 +173,35 @@
     </div>
 </div>
 
-<!-- Firebase SDK -->
+<!-- সঠিক Firebase SDK লিংক -->
 <script type="module">
     import { initializeApp } from "https://gstatic.com";
     import { getFirestore, collection, addDoc, onSnapshot, doc, getDoc } from "https://gstatic.com";
 
-    // --- আপনার FIREBASE CONFIG এখানে বসান ---
-    const firebaseConfig = {
-  apiKey: "AIzaSyDtBr3C8SZLim8S-kB6f8aMqGiR404uueU",
-  authDomain: "ktaykit-it-inv.firebaseapp.com",
-  projectId: "ktaykit-it-inv",
-  storageBucket: "ktaykit-it-inv.firebasestorage.app",
-  messagingSenderId: "81509943755",
-  appId: "1:81509943755:web:689e6c356f85c58e00ce4e",
-  measurementId: "G-B4LJ16NZ3S"
-};
+    // --- আপনার নিজের FIREBASE CONFIG নিচে বসান ---
+    // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyADezVnAvMNfKi5QnMJ-uBUHBKpckXRtV0",
+  authDomain: "kty-inv.firebaseapp.com",
+  projectId: "kty-inv",
+  storageBucket: "kty-inv.firebasestorage.app",
+  messagingSenderId: "1071673400086",
+  appId: "1:1071673400086:web:4e4e1c34848e72f2b24e37",
+  measurementId: "G-GEK63YYQ0T"
+}
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 Use code with caution.
+const db = getFirestore(app);
 const inventoryCollection = collection(db, "items");
 const qrContainer = document.getElementById("qrcode");
 let qrcodeInstance = new QRCode(qrContainer, { width: 150, height: 150 });
@@ -275,7 +285,7 @@ showQRCode(docRef.id, itemData.itemName, itemData.itemCode);
 alert(translations[currentLang].alertSuccess);
 } catch (error) {
 console.error("Error: ", error);
-alert("Database Error! Please check your Firebase Config & Rules.");
+alert("Database Error! Please check your Firebase Config & Firestore Rules.");
 }
 });
 // Live Sync
@@ -363,5 +373,3 @@ detailsBox.innerHTML = <p style="color:red;">Error loading item details.</p>;
 window.closeScannedView = function() {
 window.location.href = window.location.href.split('?')[0];
 };
-
-
