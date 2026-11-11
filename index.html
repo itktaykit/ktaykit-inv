@@ -3,351 +3,498 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KTAYKIT IT INV - Property of Ktaykit Fast Food</title>
-    <!-- Tailwind CSS -->
-    <script src="https://tailwindcss.com"></script>
-    <!-- QRCode.js Library -->
+    <title>KTAYKIT IT INV - Inventory Management</title>
+    <!-- QR Code Library via CDN -->
     <script src="https://cloudflare.com"></script>
     <style>
+        :root {
+            --primary: #d9232e;
+            --primary-dark: #b01822;
+            --secondary: #2c3e50;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #dcdde1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Header Section */
+        header {
+            background: var(--secondary);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            font-size: 13px;
+            color: #bdc3c7;
+        }
+
+        .lang-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .lang-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Grid Layout for Form & QR */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--bg-color);
+        }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--primary);
+        }
+
+        input[readonly] {
+            background-color: #ecf0f1;
+            cursor: not-allowed;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #1a252f;
+        }
+
+        /* QR Code Box */
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #qrcode {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            min-height: 160px;
+            min-width: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Table Styling */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        [dir="rtl"] th, [dir="rtl"] td {
+            text-align: right;
+        }
+
+        th {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        /* Print Styles for QR Label */
         @media print {
-            body * { visibility: hidden; }
-            #qrPanel, #qrPanel * { visibility: visible; }
-            #qrPanel { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
-            #btnPrint { display: none; }
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                text-align: center;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans p-4 md:p-6 transition-all duration-300">
+<body>
 
-    <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <header class="bg-blue-700 text-white p-5 rounded-t-xl shadow-md flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold tracking-wide">KTAYKIT IT INV</h1>
-                <p id="headerSubtitle" class="text-xs md:text-sm text-blue-200 font-medium mt-1">Property of Ktaykit Fast Food</p>
-            </div>
-            
-            <!-- Language Switcher -->
-            <button id="langSwitcher" class="bg-blue-900 hover:bg-blue-950 text-white font-semibold py-2 px-5 rounded-lg text-sm transition cursor-pointer shadow">
-                العربية
-            </button>
-        </header>
+<div class="container">
+    <!-- Header -->
+    <header>
+        <div>
+            <h1 id="app-title">KTAYKIT IT INV</h1>
+            <p id="app-subtitle">Property of Ktaykit Fast Food</p>
+        </div>
+        <button class="lang-btn" onclick="toggleLanguage()" id="lang-btn">العربية</button>
+    </header>
 
-        <!-- Single Item View Modal/Card (Opens when QR is scanned) -->
-        <div id="scannedItemView" class="hidden mt-6 bg-white p-6 md:p-8 rounded-xl shadow-lg border-t-4 border-blue-600 max-w-2xl mx-auto">
-            <div class="flex justify-between items-center border-b pb-4 mb-4">
-                <h2 id="scanViewTitle" class="text-xl font-bold text-gray-800">Item Details</h2>
-                <button onclick="closeScannedView()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium">Back to Inventory</button>
-            </div>
-            <div id="scannedItemDetails" class="space-y-3 text-gray-700">
-                <!-- Scanned item data loads here -->
-            </div>
+    <!-- Main Grid -->
+    <div class="main-grid">
+        <!-- Entry Form -->
+        <div class="card">
+            <h2 id="form-heading">Item Entry Form</h2>
+            <form id="inventory-form" onsubmit="saveItem(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label id="lbl-sr">Sr. No</label>
+                        <input type="text" id="srNo" readonly value="1">
+                    </div>
+                    <div class="form-group">
+                        <label id="lbl-code">Item Code *</label>
+                        <input type="text" id="itemCode" required placeholder="e.g. IT-1001">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label id="lbl-name">Item Name *</label>
+                    <input type="text" id="itemName" required placeholder="e.g. POS Terminal / Printer">
+                </div>
+
+                <div class="form-group">
+                    <label id="lbl-desc">Description</label>
+                    <textarea id="description" rows="2" placeholder="Model, serial number, specs..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label id="lbl-dept">Department</label>
+                        <input type="text" id="department" placeholder="e.g. IT / Kitchen / Cashier">
+                    </div>
+                    <div class="form-group">
+                        <label id="lbl-loc">Location</label>
+                        <input type="text" id="location" placeholder="e.g. Branch 1 / Head Office">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label id="lbl-status">Status</label>
+                    <select id="status">
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn" id="btn-save">Save & Generate QR</button>
+            </form>
         </div>
 
-        <!-- Main Content Grid -->
-        <div id="mainDashboard" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-            
-            <!-- Data Entry Form -->
-            <div class="bg-white p-6 rounded-xl shadow-md h-fit">
-                <h2 id="formTitle" class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Item Entry Form</h2>
-                <form id="inventoryForm" class="space-y-4">
-                    <div>
-                        <label id="lblSrNo" class="block text-sm font-semibold text-gray-700">Sr. No</label>
-                        <input type="number" id="srNo" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label id="lblItemCode" class="block text-sm font-semibold text-gray-700">Item Code</label>
-                        <input type="text" id="itemCode" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label id="lblItemName" class="block text-sm font-semibold text-gray-700">Item Name</label>
-                        <input type="text" id="itemName" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label id="lblDesc" class="block text-sm font-semibold text-gray-700">Description</label>
-                        <textarea id="description" rows="2" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                    </div>
-                    <div>
-                        <label id="lblDept" class="block text-sm font-semibold text-gray-700">Department</label>
-                        <input type="text" id="department" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label id="lblLoc" class="block text-sm font-semibold text-gray-700">Location</label>
-                        <input type="text" id="location" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label id="lblStatus" class="block text-sm font-semibold text-gray-700">Status</label>
-                        <select id="status" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                            <option value="Active" id="optActive">Active</option>
-                            <option value="Inactive" id="optInactive">Inactive</option>
-                            <option value="Maintenance" id="optMaint">Maintenance</option>
-                        </select>
-                    </div>
-                    <button type="submit" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow transition cursor-pointer">Save & Generate QR</button>
-                </form>
-            </div>
-
-            <!-- Right Side: QR Display & Data Table -->
-            <div class="lg:col-span-2 space-y-6">
-                
-                <!-- QR Code Box -->
-                <div id="qrPanel" class="bg-white p-6 rounded-xl shadow-md hidden flex flex-col items-center justify-center text-center border border-gray-200">
-                    <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Property of Ktaykit Fast Food</p>
-                    <h3 class="text-lg font-bold text-gray-800 mb-3" id="qrTitle">Generated QR Code</h3>
-                    <div id="qrcode" class="p-3 bg-white border-2 border-gray-300 rounded-lg mb-3"></div>
-                    <p class="text-xs text-gray-500 mb-4 max-w-md break-all" id="qrLinkText"></p>
-                    <button id="btnPrint" onclick="window.print()" class="bg-gray-800 text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-gray-900 cursor-pointer shadow">Print QR Label</button>
+        <!-- QR Code Preview -->
+        <div class="card qr-section">
+            <h2 id="qr-heading">Generated QR Code</h2>
+            <div id="print-area">
+                <div id="qrcode">
+                    <span style="color:#999; font-size:13px;" id="qr-placeholder">Save an item to view QR</span>
                 </div>
-
-                <!-- Data Table -->
-                <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
-                    <h2 id="tableTitle" class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Stored Inventory Items</h2>
-                    <table class="w-full text-start border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-gray-100 text-gray-700 border-b border-gray-200">
-                                <th id="thSr" class="p-3 text-start">Sr. No</th>
-                                <th id="thCode" class="p-3 text-start">Code</th>
-                                <th id="thName" class="p-3 text-start">Item Name</th>
-                                <th id="thDept" class="p-3 text-start">Dept / Location</th>
-                                <th id="thStatus" class="p-3 text-start">Status</th>
-                                <th id="thAction" class="p-3 text-center">QR Code</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventoryTableBody" class="divide-y divide-gray-200">
-                            <tr>
-                                <td colspan="6" class="p-4 text-center text-gray-400">Loading data from database...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <p id="qr-label-text" style="font-weight: bold; font-size: 14px;"></p>
             </div>
-
+            <button type="button" class="btn btn-secondary" onclick="window.print()" id="btn-print">Print QR Label</button>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://gstatic.com";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, getDoc } from "https://gstatic.com";
+    <!-- Stored Items Table -->
+    <div class="card">
+        <h2 id="table-heading">Stored Inventory Items</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th id="th-sr">Sr. No</th>
+                        <th id="th-code">Code</th>
+                        <th id="th-name">Item Name</th>
+						Dept / Location
+Status
+Action
+Property of Ktaykit Fast Food © 2026
 
-        // --- আপনার FIREBASE CONFIG এখানে বসান ---
-        const firebaseConfig = {
-  apiKey: "AIzaSyDtBr3C8SZLim8S-kB6f8aMqGiR404uueU",
-  authDomain: "ktaykit-it-inv.firebaseapp.com",
-  projectId: "ktaykit-it-inv",
-  storageBucket: "ktaykit-it-inv.firebasestorage.app",
-  messagingSenderId: "81509943755",
-  appId: "1:81509943755:web:689e6c356f85c58e00ce4e",
-  measurementId: "G-B4LJ16NZ3S"
-};
-
-       
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const inventoryCollection = collection(db, "items");
-
-        const qrContainer = document.getElementById("qrcode");
-        let qrcodeInstance = new QRCode(qrContainer, { width: 160, height: 160 });
-
-        const translations = {
-            en: {
-                dir: "ltr",
-                switcher: "العربية",
-                subtitle: "Property of Ktaykit Fast Food",
-                formTitle: "Item Entry Form",
-                lblSrNo: "Sr. No",
-                lblItemCode: "Item Code",
-                lblItemName: "Item Name",
-                lblDesc: "Description",
-                lblDept: "Department",
-                lblLoc: "Location",
-                lblStatus: "Status",
-                optActive: "Active",
-                optInactive: "Inactive",
-                optMaint: "Maintenance",
-                btnSubmit: "Save & Generate QR",
-                tableTitle: "Stored Inventory Items",
-                thSr: "Sr. No",
-                thCode: "Code",
-                thName: "Item Name",
-                thDept: "Dept / Location",
-                thStatus: "Status",
-                thAction: "QR Code",
-                btnAction: "Show QR",
-                qrTitle: "QR Code",
+let items = JSON.parse(localStorage.getItem('ktaykit_inventory')) || [];
+let currentLang = 'en';
+// Translations
+const translations = {
+en: {
+title: "KTAYKIT IT INV",
+subtitle: "Property of Ktaykit Fast Food",
+btnLang: "العربية",
+formHeading: "Item Entry Form",
+lblSr: "Sr. No",
+lblCode: "Item Code *",
+lblName: "Item Name *",
+lblDesc: "Description",
+lblDept: "Department",
+lblLoc: "Location",
+lblStatus: "Status",
+btnSave: "Save & Generate QR",
+qrHeading: "Generated QR Code",
 btnPrint: "Print QR Label",
-alertSuccess: "Data Successfully Saved!",
-scanTitle: "Scanned Item Details"
+tableHeading: "Stored Inventory Items",
+thSr: "Sr. No",
+thCode: "Code",
+thName: "Item Name",
+thDept: "Dept / Location",
+thStatus: "Status",
+thAction: "Action"
 },
 ar: {
-dir: "rtl",
-switcher: "English",
-subtitle: "ملك لـ كتيكت للوجبات السريعة",
-formTitle: "نموذج إدخال المواد",
-lblSrNo: "الرقم التسلسلي",
-lblItemCode: "رمز المادة",
-lblItemName: "اسم المادة",
+title: "جرد تقنية المعلومات - كتايكت",
+subtitle: "مملوكة لشركة كتايكت للوجبات السريعة",
+btnLang: "English",
+formHeading: "نموذج إدخال الأصناف",
+lblSr: "الرقم التسلسلي",
+lblCode: "رمز الصنف *",
+lblName: "اسم الصنف *",
 lblDesc: "الوصف",
 lblDept: "القسم",
 lblLoc: "الموقع",
 lblStatus: "الحالة",
-optActive: "نشط",
-optInactive: "غير نشط",
-optMaint: "صيانة",
-btnSubmit: "حفظ وإنشاء رمز QR",
-tableTitle: "المواد المخزنة في المستودع",
-thSr: "الرقم",
+btnSave: "حفظ وإنشاء رمز QR",
+qrHeading: "رمز QR المُنشأ",
+btnPrint: "طباعة ملصق QR",
+tableHeading: "الأصناف المخزنة",
+thSr: "م",
 thCode: "الرمز",
-thName: "اسم المادة",
+thName: "اسم الصنف",
 thDept: "القسم / الموقع",
 thStatus: "الحالة",
-thAction: "رمز QR",
-btnAction: "عرض QR",
-qrTitle: "رمز QR",
-btnPrint: "طباعة ملصق QR",
-alertSuccess: "تم حفظ البيانات بنجاح!",
-scanTitle: "تفاصيل المادة الممسوحة"
+thAction: "إجراء"
 }
 };
-let currentLang = "en";
-let localItemsList = [];
-// Language Toggle
-document.getElementById("langSwitcher").addEventListener("click", () => {
-currentLang = currentLang === "en" ? "ar" : "en";
-applyLanguage(currentLang);
-});
-function applyLanguage(lang) {
-const data = translations[lang];
-document.documentElement.dir = data.dir;
-document.documentElement.lang = lang;
-document.getElementById("langSwitcher").innerText = data.switcher;
-document.getElementById("headerSubtitle").innerText = data.subtitle;
-document.getElementById("formTitle").innerText = data.formTitle;
-document.getElementById("lblSrNo").innerText = data.lblSrNo;
-document.getElementById("lblItemCode").innerText = data.lblItemCode;
-document.getElementById("lblItemName").innerText = data.lblItemName;
-document.getElementById("lblDesc").innerText = data.lblDesc;
-document.getElementById("lblDept").innerText = data.lblDept;
-document.getElementById("lblLoc").innerText = data.lblLoc;
-document.getElementById("lblStatus").innerText = data.lblStatus;
-document.getElementById("optActive").innerText = data.optActive;
-document.getElementById("optInactive").innerText = data.optInactive;
-document.getElementById("optMaint").innerText = data.optMaint;
-document.getElementById("btnSubmit").innerText = data.btnSubmit;
-document.getElementById("tableTitle").innerText = data.tableTitle;
-document.getElementById("thSr").innerText = data.thSr;
-document.getElementById("thCode").innerText = data.thCode;
-document.getElementById("thName").innerText = data.thName;
-document.getElementById("thDept").innerText = data.thDept;
-document.getElementById("thStatus").innerText = data.thStatus;
-document.getElementById("thAction").innerText = data.thAction;
-document.getElementById("btnPrint").innerText = data.btnPrint;
-document.getElementById("scanViewTitle").innerText = data.scanTitle;
+// Initialize Page
+function init() {
+updateSrNo();
 renderTable();
 }
-// Save Data
-document.getElementById("inventoryForm").addEventListener("submit", async (e) => {
+function updateSrNo() {
+document.getElementById('srNo').value = items.length + 1;
+}
+function saveItem(e) {
 e.preventDefault();
-const itemData = {
-srNo: parseInt(document.getElementById("srNo").value),
-itemCode: document.getElementById("itemCode").value,
-itemName: document.getElementById("itemName").value,
-description: document.getElementById("description").value,
-department: document.getElementById("department").value,
-location: document.getElementById("location").value,
-status: document.getElementById("status").value,
-timestamp: new Date()
+const newItem = {
+srNo: items.length + 1,
+code: document.getElementById('itemCode').value.trim(),
+name: document.getElementById('itemName').value.trim(),
+desc: document.getElementById('description').value.trim(),
+dept: document.getElementById('department').value.trim(),
+loc: document.getElementById('location').value.trim(),
+status: document.getElementById('status').value
 };
-try {
-const docRef = await addDoc(inventoryCollection, itemData);
-document.getElementById("inventoryForm").reset();
-showQRCode(docRef.id, itemData.itemName, itemData.itemCode);
-alert(translations[currentLang].alertSuccess);
-} catch (error) {
-console.error("Error: ", error);
-alert("Database Error! Check your Firebase Config & Rules.");
-}
-});
-// Fetch Live Data
-onSnapshot(inventoryCollection, (snapshot) => {
-localItemsList = [];
-snapshot.forEach(doc => localItemsList.push({ id: doc.id, ...doc.data() }));
-localItemsList.sort((a, b) => a.srNo - b.srNo);
+items.push(newItem);
+localStorage.setItem('ktaykit_inventory', JSON.stringify(items));
+generateQR(newItem);
 renderTable();
+document.getElementById('inventory-form').reset();
+updateSrNo();
+}
+function generateQR(item) {
+const qrContainer = document.getElementById('qrcode');
+qrContainer.innerHTML = "";
+const qrData = Ktaykit IT Inv\nCode: ${item.code}\nName: ${item.name}\nDept: ${item.dept}\nLoc: ${item.loc};
+new QRCode(qrContainer, {
+text: qrData,
+width: 150,
+height: 150
 });
-// Render Table
+document.getElementById('qr-label-text').innerText = ${item.code} - ${item.name};
+}
 function renderTable() {
-const tableBody = document.getElementById("inventoryTableBody");
-tableBody.innerHTML = "";
-if (localItemsList.length === 0) {
-tableBody.innerHTML = <tr><td colspan="6" class="p-4 text-center text-gray-400">No items found. Add your first item!</td></tr>;
+const tbody = document.getElementById('inventory-list');
+tbody.innerHTML = "";
+if (items.length === 0) {
+tbody.innerHTML = <tr><td colspan="6" style="text-align:center; color:#888;">No items stored yet.</td></tr>;
 return;
 }
-localItemsList.forEach((item) => {
-const row = document.createElement("tr");
-row.className = "hover:bg-gray-50 transition";
-let statusColor = "bg-green-100 text-green-800";
-let statusText = translations[currentLang].optActive;
-if (item.status === "Inactive") {
-statusColor = "bg-red-100 text-red-800";
-statusText = translations[currentLang].optInactive;
-} else if (item.status === "Maintenance") {
-statusColor = "bg-yellow-100 text-yellow-800";
-statusText = translations[currentLang].optMaint;
-}
-row.innerHTML = `
-${item.srNo}
-${item.itemCode}
-${item.itemName}
-\({item.department}<br><span class="text-xs text-gray-400">\){item.location}
-${statusText}
-`;
-tableBody.appendChild(row);
-});
-document.querySelectorAll(".scan-qr-btn").forEach(button => {
-button.addEventListener("click", (e) => {
-const docId = e.target.getAttribute("data-id");
-const itemName = e.target.getAttribute("data-name");
-const itemCode = e.target.getAttribute("data-code");
-showQRCode(docId, itemName, itemCode);
-});
+items.forEach((item, index) => {
+const statusClass = item.status === 'Active' ? 'badge-active' : 'badge-inactive';
+const row = `
+${index + 1}
+${item.code}${item.name}\({item.dept || '-'} / \){item.loc || '-'}${item.status}`;
+tbody.innerHTML += row;
 });
 }
-// Generate QR Code
-function showQRCode(id, name, code) {
-const baseURL = window.location.href.split('?')[0];
-const scanTargetURL = ${baseURL}?viewItem=${id};
-document.getElementById("qrPanel").classList.remove("hidden");
-document.getElementById("qrTitle").innerText = ${name} (${code});
-document.getElementById("qrLinkText").innerText = scanTargetURL;
-qrcodeInstance.clear();
-qrcodeInstance.makeCode(scanTargetURL);
-}
-// Handle QR Scan Page Load
-window.addEventListener('DOMContentLoaded', async () => {
-const urlParams = new URLSearchParams(window.location.search);
-const viewItemId = urlParams.get('viewItem');
-if (viewItemId) {
-document.getElementById("mainDashboard").classList.add("hidden");
-const scanCard = document.getElementById("scannedItemView");
-const detailsBox = document.getElementById("scannedItemDetails");
-scanCard.classList.remove("hidden");
-detailsBox.innerHTML = <p class="text-gray-500">Fetching item details from cloud...</p>;
-try {
-const docRef = doc(db, "items", viewItemId);
-const docSnap = await getDoc(docRef);
-if (docSnap.exists()) {
-const data = docSnap.data();
-detailsBox.innerHTML = <div class="bg-gray-50 p-4 rounded-lg border space-y-2"> <p><strong>Sr. No:</strong> ${data.srNo}</p> <p><strong>Item Code:</strong> <span class="font-mono text-blue-700 font-bold">${data.itemCode}</span></p> <p><strong>Item Name:</strong> ${data.itemName}</p> <p><strong>Description:</strong> ${data.description || 'N/A'}</p> <p><strong>Department:</strong> ${data.department}</p> <p><strong>Location:</strong> ${data.location}</p> <p><strong>Status:</strong> <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold">${data.status}</span></p> </div>;
-} else {
-detailsBox.innerHTML = <p class="text-red-500 font-semibold">Item not found in database!</p>;
-}
-} catch (err) {
-detailsBox.innerHTML = <p class="text-red-500">Error loading item details.</p>;
+function deleteItem(index) {
+if (confirm("Are you sure you want to delete this item?")) {
+items.splice(index, 1);
+localStorage.setItem('ktaykit_inventory', JSON.stringify(items));
+renderTable();
+updateSrNo();
 }
 }
-});
-window.closeScannedView = function() {
-window.location.href = window.location.href.split('?')[0];
-};
+function toggleLanguage() {
+currentLang = currentLang === 'en' ? 'ar' : 'en';
+const t = translations[currentLang];
+document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+document.getElementById('app-title').innerText = t.title;
+document.getElementById('app-subtitle').innerText = t.subtitle;
+document.getElementById('lang-btn').innerText = t.btnLang;
+document.getElementById('form-heading').innerText = t.formHeading;
+document.getElementById('lbl-sr').innerText = t.lblSr;
+document.getElementById('lbl-code').innerText = t.lblCode;
+document.getElementById('lbl-name').innerText = t.lblName;
+document.getElementById('lbl-desc').innerText = t.lblDesc;
+document.getElementById('lbl-dept').innerText = t.lblDept;
+document.getElementById('lbl-loc').innerText = t.lblLoc;
+document.getElementById('lbl-status').innerText = t.lblStatus;
+document.getElementById('btn-save').innerText = t.btnSave;
+document.getElementById('qr-heading').innerText = t.qrHeading;
+document.getElementById('btn-print').innerText = t.btnPrint;
+document.getElementById('table-heading').innerText = t.tableHeading;
+document.getElementById('th-sr').innerText = t.thSr;
+document.getElementById('th-code').innerText = t.thCode;
+document.getElementById('th-name').innerText = t.thName;
+document.getElementById('th-dept').innerText = t.thDept;
+document.getElementById('th-status').innerText = t.thStatus;
+document.getElementById('th-action').innerText = t.thAction;
+}
+init();
