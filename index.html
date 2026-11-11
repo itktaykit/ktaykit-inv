@@ -4,29 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KTAYKIT IT INV - Property of Ktaykit Fast Food</title>
-    <!-- সঠিক QR Code Library লিংক -->
     <script src="https://cloudflare.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f3f4f6; color: #1f2937; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
         
-        /* Header */
         header { background-color: #1d4ed8; color: white; padding: 20px 25px; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         header h1 { font-size: 24px; letter-spacing: 0.5px; }
         header p { font-size: 13px; color: #bfdbfe; margin-top: 4px; }
         .lang-btn { background-color: #1e3a8a; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
         .lang-btn:hover { background-color: #172554; }
 
-        /* Layout Grid */
         .main-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 24px; margin-top: 24px; }
         @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
 
-        /* Cards */
         .card { background: white; padding: 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
         .card h2 { font-size: 18px; color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 18px; }
 
-        /* Form Styles */
         .form-group { margin-bottom: 14px; }
         .form-group label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; }
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; outline: none; }
@@ -34,20 +29,17 @@
         .submit-btn { width: 100%; background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
         .submit-btn:hover { background-color: #1d4ed8; }
 
-        /* QR Panel */
         .qr-panel { text-align: center; margin-bottom: 24px; border: 2px dashed #93c5fd; background-color: #eff6ff; display: none; }
         .qr-panel.active { display: block; }
         #qrcode { display: inline-block; padding: 12px; background: white; border: 1px solid #d1d5db; border-radius: 8px; margin: 12px 0; }
         .print-btn { background-color: #1f2937; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; margin-top: 8px; }
 
-        /* Table Styles */
         .table-wrapper { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: start; }
         th { background-color: #f9fafb; color: #374151; font-weight: 600; padding: 12px; border-bottom: 2px solid #e5e7eb; }
         td { padding: 12px; border-bottom: 1px solid #e5e7eb; color: #4b5563; }
         tr:hover { background-color: #f9fafb; }
         
-        /* Badges & Buttons */
         .badge { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; display: inline-block; }
         .badge-active { background-color: #dcfce7; color: #166534; }
         .badge-inactive { background-color: #fee2e2; color: #991b1b; }
@@ -55,7 +47,6 @@
         .qr-btn { background-color: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600; }
         .qr-btn:hover { background-color: #2563eb; }
 
-        /* Scanned View Modal */
         .scan-view { max-width: 600px; margin: 24px auto; border-top: 5px solid #2563eb; display: none; }
         .scan-view.active { display: block; }
         .scan-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px; margin-bottom: 16px; }
@@ -73,7 +64,6 @@
 <body>
 
 <div class="container">
-    <!-- Header -->
     <header>
         <div>
             <h1>KTAYKIT IT INV</h1>
@@ -82,7 +72,6 @@
         <button id="langSwitcher" class="lang-btn">العربية</button>
     </header>
 
-    <!-- Scanned Item View (Opens when QR is scanned) -->
     <div id="scannedItemView" class="card scan-view">
         <div class="scan-header">
             <h2 id="scanViewTitle" style="border:none; margin:0; padding:0;">Scanned Item Details</h2>
@@ -91,10 +80,7 @@
         <div id="scannedItemDetails"></div>
     </div>
 
-    <!-- Main Dashboard -->
     <div id="mainDashboard" class="main-grid">
-        
-        <!-- Data Entry Form -->
         <div class="card">
             <h2 id="formTitle">Item Entry Form</h2>
             <form id="inventoryForm">
@@ -134,9 +120,7 @@
             </form>
         </div>
 
-        <!-- Right Side: QR & Table -->
         <div>
-            <!-- QR Code Display -->
             <div id="qrPanel" class="card qr-panel">
                 <p style="font-size: 11px; font-weight: bold; color: #1d4ed8; text-transform: uppercase;">Property of Ktaykit Fast Food</p>
                 <h3 id="qrTitle" style="margin-top: 4px; color: #111827;">Generated QR Code</h3>
@@ -145,7 +129,6 @@
                 <button id="btnPrint" onclick="window.print()" class="print-btn">Print QR Label</button>
             </div>
 
-            <!-- Stored Inventory Table -->
             <div class="card">
                 <h2 id="tableTitle">Stored Inventory Items</h2>
                 <div class="table-wrapper">
@@ -169,42 +152,38 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
-<!-- সঠিক Firebase SDK লিংক -->
 <script type="module">
     import { initializeApp } from "https://gstatic.com";
     import { getFirestore, collection, addDoc, onSnapshot, doc, getDoc } from "https://gstatic.com";
 
-    // --- আপনার নিজের FIREBASE CONFIG নিচে বসান ---
+    // --- PASTE YOUR FIREBASE CONFIG BELOW ---
     const firebaseConfig = {
         apiKey: "AIzaSyADezVnAvMNfKi5QnMJ-uBUHBKpckXRtV0",
-
   authDomain: "kty-inv.firebaseapp.com",
-
   projectId: "kty-inv",
-
   storageBucket: "kty-inv.firebasestorage.app",
-
   messagingSenderId: "1071673400086",
-
   appId: "1:1071673400086:web:4e4e1c34848e72f2b24e37",
-
   measurementId: "G-GEK63YYQ0T"
+
     };
 
     const app = initializeApp(firebaseConfig);
-	const db = getFirestore(app);
-const inventoryCollection = collection(db, "items");
-const qrContainer = document.getElementById("qrcode");
-let qrcodeInstance = new QRCode(qrContainer, { width: 150, height: 150 });
-const translations = {
-en: {
-dir: "ltr", switcher: "العربية", subtitle: "Property of Ktaykit Fast Food",
-formTitle: "Item Entry Form", lblSrNo: "Sr. No", lblItemCode: "Item Code",
-lblItemName: "Item Name", lblDesc: "Description", lblDept: "Department",
+    const db = getFirestore(app);
+    const inventoryCollection = collection(db, "items");
+
+    const qrContainer = document.getElementById("qrcode");
+    let qrcodeInstance = new QRCode(qrContainer, { width: 150, height: 150 });
+
+    const translations = {
+        en: {
+            dir: "ltr", switcher: "العربية", subtitle: "Property of Ktaykit Fast Food",
+            formTitle: "Item Entry Form", lblSrNo: "Sr. No", lblItemCode: "Item Code",
+            lblItemName: "Item Name", lblDesc: "Description", lblDept: "Department",
+Use code with caution.
 lblLoc: "Location", lblStatus: "Status", optActive: "Active",
 optInactive: "Inactive", optMaint: "Maintenance", btnSubmit: "Save & Generate QR",
 tableTitle: "Stored Inventory Items", thSr: "Sr. No", thCode: "Code",
@@ -225,14 +204,13 @@ alertSuccess: "تم حفظ البيانات بنجاح!", scanTitle: "تفاصي
 }
 };
 let currentLang = "en";
-let localItemsList = [];
-// Language Switcher
+let localItemsList = new Array();
 document.getElementById("langSwitcher").addEventListener("click", () => {
 currentLang = currentLang === "en" ? "ar" : "en";
 applyLanguage(currentLang);
 });
 function applyLanguage(lang) {
-const data = translations[lang];
+const data = translations.lang || (lang === "en" ? translations.en : translations.ar);
 document.documentElement.dir = data.dir;
 document.documentElement.lang = lang;
 document.getElementById("langSwitcher").innerText = data.switcher;
@@ -260,9 +238,9 @@ document.getElementById("btnPrint").innerText = data.btnPrint;
 document.getElementById("scanViewTitle").innerText = data.scanTitle;
 renderTable();
 }
-// Save Data
 document.getElementById("inventoryForm").addEventListener("submit", async (e) => {
 e.preventDefault();
+const t = currentLang === "en" ? translations.en : translations.ar;
 const itemData = {
 srNo: parseInt(document.getElementById("srNo").value),
 itemCode: document.getElementById("itemCode").value,
@@ -277,25 +255,24 @@ try {
 const docRef = await addDoc(inventoryCollection, itemData);
 document.getElementById("inventoryForm").reset();
 showQRCode(docRef.id, itemData.itemName, itemData.itemCode);
-alert(translations[currentLang].alertSuccess);
+alert(t.alertSuccess);
 } catch (error) {
 console.error("Error: ", error);
-alert("Database Error! Please check your Firebase Config.");
+alert("Database Error: " + error.message);
 }
 });
-// Live Sync
 onSnapshot(inventoryCollection, (snapshot) => {
-localItemsList = [];
+localItemsList = new Array();
 snapshot.forEach(doc => localItemsList.push({ id: doc.id, ...doc.data() }));
 localItemsList.sort((a, b) => a.srNo - b.srNo);
 renderTable();
 }, (error) => {
 console.error("Firestore Error:", error);
-document.getElementById("inventoryTableBody").innerHTML = <tr><td colspan="6" style="text-align:center; color:red;">Database Connection Failed! Check Firebase Config.</td></tr>;
+document.getElementById("inventoryTableBody").innerHTML = <tr><td colspan="6" style="text-align:center; color:red;">Error: ${error.message}</td></tr>;
 });
-// Render Table
 function renderTable() {
 const tableBody = document.getElementById("inventoryTableBody");
+const t = currentLang === "en" ? translations.en : translations.ar;
 tableBody.innerHTML = "";
 if (localItemsList.length === 0) {
 tableBody.innerHTML = <tr><td colspan="6" style="text-align:center; color:#9ca3af;">No items found. Add your first item!</td></tr>;
@@ -304,13 +281,13 @@ return;
 localItemsList.forEach((item) => {
 const row = document.createElement("tr");
 let badgeClass = "badge-active";
-let statusText = translations[currentLang].optActive;
+let statusText = t.optActive;
 if (item.status === "Inactive") {
 badgeClass = "badge-inactive";
-statusText = translations[currentLang].optInactive;
+statusText = t.optInactive;
 } else if (item.status === "Maintenance") {
 badgeClass = "badge-maint";
-statusText = translations[currentLang].optMaint;
+statusText = t.optMaint;
 }
 row.innerHTML = `
 ${item.srNo}
@@ -331,9 +308,9 @@ e.target.getAttribute("data-code")
 });
 });
 }
-// Generate QR
 function showQRCode(id, name, code) {
-const baseURL = window.location.href.split('?')[0];
+const urlObj = new URL(window.location.href);
+const baseURL = urlObj.origin + urlObj.pathname;
 const scanTargetURL = ${baseURL}?viewItem=${id};
 document.getElementById("qrPanel").classList.add("active");
 document.getElementById("qrTitle").innerText = ${name} (${code});
@@ -341,7 +318,6 @@ document.getElementById("qrLinkText").innerText = scanTargetURL;
 qrcodeInstance.clear();
 qrcodeInstance.makeCode(scanTargetURL);
 }
-// Handle QR Scan Page Load
 window.addEventListener('DOMContentLoaded', async () => {
 const urlParams = new URLSearchParams(window.location.search);
 const viewItemId = urlParams.get('viewItem');
@@ -361,10 +337,11 @@ detailsBox.innerHTML = <div class="detail-row"><strong>Sr. No:</strong> ${data.s
 detailsBox.innerHTML = <p style="color:red; font-weight:bold;">Item not found in database!</p>;
 }
 } catch (err) {
-detailsBox.innerHTML = <p style="color:red;">Error loading item details.</p>;
+detailsBox.innerHTML = <p style="color:red;">Error: ${err.message}</p>;
 }
 }
 });
 window.closeScannedView = function() {
-window.location.href = window.location.href.split('?')[0];
+const urlObj = new URL(window.location.href);
+window.location.href = urlObj.origin + urlObj.pathname;
 };
