@@ -36,7 +36,7 @@
             <div>
                 <label class="block text-sm font-semibold text-gray-700">Select User / Role</label>
                 <select id="loginRoleSelect" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium">
-                    <!-- Dynamic users loaded here -->
+                    <!-- Dynamic users -->
                 </select>
             </div>
             <div>
@@ -47,7 +47,7 @@
         </form>
     </div>
 
-    <!-- MAIN APP CONTAINER (Hidden until login) -->
+    <!-- MAIN APP CONTAINER -->
     <div id="appContainer" class="max-w-7xl mx-auto hidden">
         <!-- Header -->
         <header class="bg-blue-700 text-white p-5 rounded-t-xl shadow-md flex justify-between items-center">
@@ -66,16 +66,16 @@
             </div>
         </header>
 
-        <!-- Admin Control Bar (Add User & Approvals) -->
+        <!-- Admin Control Bar -->
         <div id="adminControlBar" class="hidden mt-4 bg-white p-4 rounded-xl shadow border flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="flex items-center gap-2">
                 <span class="text-amber-600 font-bold">⚠️ Pending Authorizations:</span>
                 <span id="pendingCount" class="bg-amber-200 text-amber-900 px-2.5 py-0.5 rounded-full text-xs font-bold">0</span>
                 <button onclick="openApprovalModal()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow cursor-pointer ml-2">Review Requests</button>
             </div>
-            <div class="flex gap-2">
-                <button onclick="openAddUserModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow cursor-pointer">➕ Add New User</button>
-                <button onclick="openChangePasswordModal()" class="bg-gray-700 hover:bg-gray-800 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow cursor-pointer">🔑 Change Password</button>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="openAddUserModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow cursor-pointer">➕ Add User</button>
+                <button onclick="openChangePasswordModal()" class="bg-gray-700 hover:bg-gray-800 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow cursor-pointer">🔑 Change Password</button>
             </div>
         </div>
 
@@ -100,7 +100,7 @@
                         <input type="text" id="srNo" readonly class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg bg-gray-100 font-mono text-gray-600 cursor-not-allowed">
                     </div>
                     <div>
-                        <label id="lblItemCode" class="block text-sm font-semibold text-gray-700">Item Code (Auto KTY-ITP-...)</label>
+                        <label id="lblItemCode" class="block text-sm font-semibold text-gray-700">Item Code (Auto)</label>
                         <input type="text" id="itemCode" readonly class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg bg-gray-100 font-mono text-gray-600 cursor-not-allowed">
                     </div>
                     <div>
@@ -121,28 +121,29 @@
                             <input type="date" id="warrantyDate" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                         </div>
                     </div>
+                    
+                    <!-- Department Field with Direct Add Button -->
                     <div>
-                        <label id="lblDept" class="block text-sm font-semibold text-gray-700">Department</label>
-                        <select id="department" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white mb-2">
-                            <option value="IT Support">IT Support</option>
-                            <option value="Kitchen">Kitchen</option>
-                            <option value="Cashier / POS">Cashier / POS</option>
-                            <option value="Management">Management</option>
-                            <option value="add_new">+ Add New Department</option>
+                        <div class="flex justify-between items-center">
+                            <label id="lblDept" class="block text-sm font-semibold text-gray-700">Department</label>
+                            <button type="button" onclick="openAddDepartmentModal()" class="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer">+ Add New</button>
+                        </div>
+                        <select id="department" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <!-- Populated dynamically -->
                         </select>
-                        <input type="text" id="newDepartmentInput" placeholder="Enter new department..." class="hidden w-full p-2.5 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
+
+                    <!-- Location Field with Direct Add Button -->
                     <div>
-                        <label id="lblLoc" class="block text-sm font-semibold text-gray-700">Location</label>
-                        <select id="location" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white mb-2">
-                            <option value="Branch Main Hall">Branch Main Hall</option>
-                            <option value="Server Room">Server Room</option>
-                            <option value="Kitchen Counter">Kitchen Counter</option>
-                            <option value="Store Room">Store Room</option>
-                            <option value="add_new">+ Add New Location</option>
+                        <div class="flex justify-between items-center">
+                            <label id="lblLoc" class="block text-sm font-semibold text-gray-700">Location</label>
+                            <button type="button" onclick="openAddLocationModal()" class="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer">+ Add New</button>
+                        </div>
+                        <select id="location" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <!-- Populated dynamically -->
                         </select>
-                        <input type="text" id="newLocationInput" placeholder="Enter new location..." class="hidden w-full p-2.5 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
+
                     <div>
                         <label id="lblStatus" class="block text-sm font-semibold text-gray-700">Status</label>
                         <select id="status" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
@@ -209,12 +210,35 @@
         </div>
     </div>
 
+    <!-- Modals for Add Department & Location -->
+    <div id="addDeptModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-sm w-full p-6 rounded-2xl shadow-xl space-y-3">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-gray-800">Add New Department</h3>
+                <button onclick="closeAddDeptModal()" class="text-gray-500 font-bold">&times;</button>
+            </div>
+            <input type="text" id="customDeptInput" placeholder="Enter department name..." class="w-full p-2.5 border rounded-lg outline-none">
+            <button onclick="saveNewDepartment()" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg cursor-pointer">Add Department</button>
+        </div>
+    </div>
+
+    <div id="addLocModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-sm w-full p-6 rounded-2xl shadow-xl space-y-3">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-gray-800">Add New Location</h3>
+                <button onclick="closeAddLocModal()" class="text-gray-500 font-bold">&times;</button>
+            </div>
+            <input type="text" id="customLocInput" placeholder="Enter location name..." class="w-full p-2.5 border rounded-lg outline-none">
+            <button onclick="saveNewLocation()" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg cursor-pointer">Add Location</button>
+        </div>
+    </div>
+
     <!-- Approval Modal -->
     <div id="approvalModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-2xl w-full p-6 rounded-2xl shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="text-lg font-bold text-gray-800">Pending Authorization Requests</h3>
-                <button onclick="closeApprovalModal()" class="text-gray-500 hover:text-gray-700 font-bold text-lg">&times;</button>
+                <button onclick="closeApprovalModal()" class="text-gray-500 font-bold text-lg">&times;</button>
             </div>
             <div id="approvalList" class="space-y-3 max-h-96 overflow-y-auto"></div>
         </div>
@@ -225,15 +249,15 @@
         <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="text-lg font-bold text-gray-800">Add New User</h3>
-                <button onclick="closeAddUserModal()" class="text-gray-500 hover:text-gray-700 font-bold text-lg">&times;</button>
+                <button onclick="closeAddUserModal()" class="text-gray-500 font-bold text-lg">&times;</button>
             </div>
             <form id="addUserForm" class="space-y-3">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700">Username / Name</label>
-                    <input type="text" id="newUsername" required class="w-full mt-1 p-2.5 border rounded-lg outline-none" placeholder="e.g. John Doe">
+                    <label class="block text-sm font-semibold text-gray-700">Username</label>
+                    <input type="text" id="newUsername" required class="w-full mt-1 p-2.5 border rounded-lg outline-none" placeholder="e.g. John">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700">Role / Permission</label>
+                    <label class="block text-sm font-semibold text-gray-700">Role</label>
                     <select id="newUserRole" class="w-full mt-1 p-2.5 border rounded-lg outline-none bg-white">
                         <option value="assistant_edit">IT Assistant (Editing Mode - No Delete)</option>
                         <option value="assistant_view">IT Assistant 1 (View Only - Needs Approval)</option>
@@ -241,9 +265,9 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700">Password</label>
-                    <input type="password" id="newUserPassword" required class="w-full mt-1 p-2.5 border rounded-lg outline-none" placeholder="Set password">
+                    <input type="password" id="newUserPassword" required class="w-full mt-1 p-2.5 border rounded-lg outline-none">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow cursor-pointer">Save New User</button>
+                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg cursor-pointer">Save User</button>
             </form>
         </div>
     </div>
@@ -252,8 +276,8 @@
     <div id="changePasswordModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-800">Change User Password</h3>
-                <button onclick="closeChangePasswordModal()" class="text-gray-500 hover:text-gray-700 font-bold text-lg">&times;</button>
+                <h3 class="text-lg font-bold text-gray-800">Change Password</h3>
+                <button onclick="closeChangePasswordModal()" class="text-gray-500 font-bold text-lg">&times;</button>
             </div>
             <form id="changePasswordForm" class="space-y-3">
                 <div>
@@ -262,9 +286,9 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700">New Password</label>
-                    <input type="password" id="targetNewPassword" required class="w-full mt-1 p-2.5 border rounded-lg outline-none" placeholder="Enter new password">
+                    <input type="password" id="targetNewPassword" required class="w-full mt-1 p-2.5 border rounded-lg outline-none">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow cursor-pointer">Update Password</button>
+                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg cursor-pointer">Update Password</button>
             </form>
         </div>
     </div>
@@ -272,7 +296,7 @@
     <!-- Firebase SDK & Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // --- আপনার Firebase Config এখানে বসান ---
         const firebaseConfig = {
@@ -292,6 +316,9 @@
 
         let currentUser = null;
         let usersList = [];
+        let departmentsList = ["IT Support", "Kitchen", "Cashier / POS", "Management"];
+        let locationsList = ["Branch Main Hall", "Server Room", "Kitchen Counter", "Store Room"];
+
         const qrContainer = document.getElementById("qrcode");
         let qrcodeInstance = new QRCode(qrContainer, { width: 160, height: 160 });
 
@@ -324,12 +351,75 @@
         let localItemsList = [];
         let pendingRequestsList = [];
 
-        // Fetch Users from Firestore in Real-time
+        // Populate Dropdowns
+        function updateDropdowns() {
+            const deptSelect = document.getElementById("department");
+            const locSelect = document.getElementById("location");
+            
+            const currentDept = deptSelect.value;
+            const currentLoc = locSelect.value;
+
+            deptSelect.innerHTML = "";
+            departmentsList.forEach(d => {
+                const opt = document.createElement("option");
+                opt.value = d;
+                opt.innerText = d;
+                deptSelect.appendChild(opt);
+            });
+            if (departmentsList.includes(currentDept)) deptSelect.value = currentDept;
+
+            locSelect.innerHTML = "";
+            locationsList.forEach(l => {
+                const opt = document.createElement("option");
+                opt.value = l;
+                opt.innerText = l;
+                locSelect.appendChild(opt);
+            });
+            if (locationsList.includes(currentLoc)) locSelect.value = currentLoc;
+        }
+
+        // Add Dept Modal Actions
+        window.openAddDepartmentModal = function() {
+            document.getElementById("addDeptModal").classList.remove("hidden");
+            document.getElementById("customDeptInput").focus();
+        }
+        window.closeAddDeptModal = function() {
+            document.getElementById("addDeptModal").classList.add("hidden");
+            document.getElementById("customDeptInput").value = "";
+        }
+        window.saveNewDepartment = function() {
+            const val = document.getElementById("customDeptInput").value.trim();
+            if (val && !departmentsList.includes(val)) {
+                departmentsList.push(val);
+                updateDropdowns();
+                document.getElementById("department").value = val;
+            }
+            closeAddDeptModal();
+        }
+
+        // Add Loc Modal Actions
+        window.openAddLocationModal = function() {
+            document.getElementById("addLocModal").classList.remove("hidden");
+            document.getElementById("customLocInput").focus();
+        }
+        window.closeAddLocModal = function() {
+            document.getElementById("addLocModal").classList.add("hidden");
+            document.getElementById("customLocInput").value = "";
+        }
+        window.saveNewLocation = function() {
+            const val = document.getElementById("customLocInput").value.trim();
+            if (val && !locationsList.includes(val)) {
+                locationsList.push(val);
+                updateDropdowns();
+                document.getElementById("location").value = val;
+            }
+            closeAddLocModal();
+        }
+
+        // Fetch Users
         onSnapshot(usersCollection, async (snapshot) => {
             usersList = [];
             snapshot.forEach(doc => usersList.push({ id: doc.id, ...doc.data() }));
-
-            // If no users exist, create default Admin user (password: 123456)
             if (usersList.length === 0) {
                 await setDoc(doc(usersCollection, "admin"), { name: "Administrator", role: "admin", password: "123456" });
                 return;
@@ -348,24 +438,21 @@
             });
         }
 
-        // --- LOGIN HANDLER ---
         document.getElementById("loginForm").addEventListener("submit", (e) => {
             e.preventDefault();
             const selectedId = document.getElementById("loginRoleSelect").value;
             const password = document.getElementById("loginPassword").value;
-
             const user = usersList.find(u => u.id === selectedId);
             if (!user || user.password !== password) {
                 alert("Incorrect Password!");
                 return;
             }
-
             currentUser = user;
             document.getElementById("loginScreen").classList.add("hidden");
             document.getElementById("appContainer").classList.remove("hidden");
             document.getElementById("loggedInUserBadge").innerText = `👤 ${currentUser.name} (${currentUser.role})`;
-
             applyPermissions();
+            updateDropdowns();
         });
 
         window.logout = function() {
@@ -381,12 +468,9 @@
             if (currentUser.role === "assistant_view") {
                 formInputs.forEach(el => el.disabled = true);
                 document.getElementById("btnSubmit").innerText = "View Only Mode";
-                document.getElementById("btnSubmit").classList.add("opacity-50", "cursor-not-allowed");
             } else {
                 formInputs.forEach(el => el.disabled = false);
-                document.getElementById("btnSubmit").classList.remove("opacity-50", "cursor-not-allowed");
             }
-
             if (currentUser.role === "admin") {
                 document.getElementById("adminControlBar").classList.remove("hidden");
             } else {
@@ -394,33 +478,19 @@
             }
         }
 
-        // --- Add User Modal Functions ---
-        window.openAddUserModal = function() {
-            document.getElementById("addUserModal").classList.remove("hidden");
-        }
-        window.closeAddUserModal = function() {
-            document.getElementById("addUserModal").classList.add("hidden");
-            document.getElementById("addUserForm").reset();
-        }
-
+        window.openAddUserModal = function() { document.getElementById("addUserModal").classList.remove("hidden"); }
+        window.closeAddUserModal = function() { document.getElementById("addUserModal").classList.add("hidden"); document.getElementById("addUserForm").reset(); }
         document.getElementById("addUserForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             const name = document.getElementById("newUsername").value.trim();
             const role = document.getElementById("newUserRole").value;
             const password = document.getElementById("newUserPassword").value;
             const docId = name.toLowerCase().replace(/\s+/g, '_');
-
-            try {
-                await setDoc(doc(usersCollection, docId), { name, role, password });
-                alert("New user successfully created!");
-                closeAddUserModal();
-            } catch (err) {
-                console.error(err);
-                alert("Failed to create user.");
-            }
+            await setDoc(doc(usersCollection, docId), { name, role, password });
+            alert("New user created successfully!");
+            closeAddUserModal();
         });
 
-        // --- Change Password Modal Functions ---
         window.openChangePasswordModal = function() {
             const select = document.getElementById("targetUserSelect");
             select.innerHTML = "";
@@ -432,24 +502,14 @@
             });
             document.getElementById("changePasswordModal").classList.remove("hidden");
         }
-        window.closeChangePasswordModal = function() {
-            document.getElementById("changePasswordModal").classList.add("hidden");
-            document.getElementById("changePasswordForm").reset();
-        }
-
+        window.closeChangePasswordModal = function() { document.getElementById("changePasswordModal").classList.add("hidden"); }
         document.getElementById("changePasswordForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             const targetId = document.getElementById("targetUserSelect").value;
             const newPass = document.getElementById("targetNewPassword").value;
-
-            try {
-                await updateDoc(doc(usersCollection, targetId), { password: newPass });
-                alert("Password successfully updated!");
-                closeChangePasswordModal();
-            } catch (err) {
-                console.error(err);
-                alert("Failed to update password.");
-            }
+            await updateDoc(doc(usersCollection, targetId), { password: newPass });
+            alert("Password updated!");
+            closeChangePasswordModal();
         });
 
         document.getElementById("langSwitcher").addEventListener("click", () => {
@@ -487,12 +547,6 @@
             if (currentUser.role === "assistant_view") return alert("View only mode!");
 
             const editId = document.getElementById("editingDocId").value;
-            let dept = document.getElementById("department").value;
-            if (dept === "add_new") dept = document.getElementById("newDepartmentInput").value.trim();
-
-            let loc = document.getElementById("location").value;
-            if (loc === "add_new") loc = document.getElementById("newLocationInput").value.trim();
-
             const itemData = {
                 srNo: document.getElementById("srNo").value,
                 itemCode: document.getElementById("itemCode").value,
@@ -500,8 +554,8 @@
                 description: document.getElementById("description").value,
                 purchaseDate: document.getElementById("purchaseDate").value,
                 warrantyDate: document.getElementById("warrantyDate").value,
-                department: dept,
-                location: loc,
+                department: document.getElementById("department").value,
+                location: document.getElementById("location").value,
                 status: document.getElementById("status").value,
                 remarks: document.getElementById("remarks").value || '-',
                 timestamp: new Date()
@@ -638,22 +692,16 @@
             document.getElementById("approvalModal").classList.remove("hidden");
         }
 
-        window.closeApprovalModal = function() {
-            document.getElementById("approvalModal").classList.add("hidden");
-        }
+        window.closeApprovalModal = function() { document.getElementById("approvalModal").classList.add("hidden"); }
 
         window.approveRequest = async function(reqId) {
             const req = pendingRequestsList.find(r => r.id === reqId);
             if (!req) return;
-            try {
-                if (req.type === "ADD") await addDoc(inventoryCollection, req.data);
-                else if (req.type === "UPDATE" && req.targetId) await updateDoc(doc(db, "items", req.targetId), req.data);
-                await deleteDoc(doc(db, "requests", reqId));
-                alert("Request authorized!");
-                openApprovalModal();
-            } catch (err) {
-                alert("Failed to approve.");
-            }
+            if (req.type === "ADD") await addDoc(inventoryCollection, req.data);
+            else if (req.type === "UPDATE" && req.targetId) await updateDoc(doc(db, "items", req.targetId), req.data);
+            await deleteDoc(doc(db, "requests", reqId));
+            alert("Request authorized!");
+            openApprovalModal();
         }
 
         window.rejectRequest = async function(reqId) {
@@ -694,45 +742,4 @@
         async function deleteItem(id) {
             if (currentUser.role !== "admin") return alert("Only Admin can delete!");
             if (confirm("Delete this item?")) {
-                await deleteDoc(doc(db, "items", id));
-                alert("Item deleted!");
-            }
-        }
-
-        function showQRCode(id, name, code) {
-            const baseURL = window.location.href.split('?')[0];
-            const scanTargetURL = `${baseURL}?viewItem=${id}`;
-            document.getElementById("qrPanel").classList.remove("hidden");
-            document.getElementById("qrTitle").innerText = `${name} (${code})`;
-            document.getElementById("qrLinkText").innerText = scanTargetURL;
-            qrcodeInstance.clear();
-            qrcodeInstance.makeCode(scanTargetURL);
-        }
-
-        window.exportToExcel = function() {
-            if (localItemsList.length === 0) return alert("No data!");
-            const exportData = localItemsList.map(item => ({
-                "Sr. No": item.srNo, "Item Code": item.itemCode, "Item Name": item.itemName,
-                "Description": item.description || "", "Purchase Date": item.purchaseDate || "",
-                "Warranty Date": item.warrantyDate || "", "Department": item.department,
-                "Location": item.location, "Status": item.status, "Remarks": item.remarks
-            }));
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Inventory");
-            XLSX.writeFile(workbook, "Ktayat_IT_Inventory.xlsx");
-        }
-
-        window.exportToPDF = function() {
-            if (localItemsList.length === 0) return alert("No data!");
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(16);
-            doc.text("KTAYKIT IT INV - Inventory Report", 14, 15);
-            const tableData = localItemsList.map(item => [item.srNo, item.itemCode, item.itemName, item.department, item.location, item.status, item.purchaseDate || '-']);
-            doc.autoTable({ startY: 25, head: [['Sr. No', 'Code', 'Item Name', 'Department', 'Location', 'Status', 'Purchase']], body: tableData, theme: 'grid' });
-            doc.save("Ktayat_IT_Inventory.pdf");
-        }
-    </script>
-</body>
-</html>
+                await
