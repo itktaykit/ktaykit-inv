@@ -33,15 +33,13 @@
             </button>
         </header>
 
-        <!-- Single Item View Modal/Card (Opens when QR is scanned) -->
+        <!-- Single Item View Card (Opens when QR is scanned) -->
         <div id="scannedItemView" class="hidden mt-6 bg-white p-6 md:p-8 rounded-xl shadow-lg border-t-4 border-blue-600 max-w-2xl mx-auto">
             <div class="flex justify-between items-center border-b pb-4 mb-4">
-                <h2 id="scanViewTitle" class="text-xl font-bold text-gray-800">Item Details</h2>
-                <button onclick="closeScannedView()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium">Back to Inventory</button>
+                <h2 id="scanViewTitle" class="text-xl font-bold text-gray-800">Scanned Item Details</h2>
+                <button onclick="closeScannedView()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium cursor-pointer">Back to Inventory</button>
             </div>
-            <div id="scannedItemDetails" class="space-y-3 text-gray-700">
-                <!-- Scanned item data loads here -->
-            </div>
+            <div id="scannedItemDetails" class="space-y-3 text-gray-700"></div>
         </div>
 
         <!-- Main Content Grid -->
@@ -132,13 +130,15 @@
 
         // --- আপনার FIREBASE CONFIG এখানে বসান ---
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+  apiKey: "AIzaSyDtBr3C8SZLim8S-kB6f8aMqGiR404uueU",
+  authDomain: "ktaykit-it-inv.firebaseapp.com",
+  projectId: "ktaykit-it-inv",
+  storageBucket: "ktaykit-it-inv.firebasestorage.app",
+  messagingSenderId: "81509943755",
+  appId: "1:81509943755:web:689e6c356f85c58e00ce4e",
+  measurementId: "G-B4LJ16NZ3S"
+};
+
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -173,3 +173,178 @@
                 thAction: "QR Code",
                 btnAction: "Show QR",
                 qrTitle: "QR Code",
+                btnPrint: "Print QR Label",
+alertSuccess: "Data Successfully Saved!",
+scanTitle: "Scanned Item Details"
+},
+ar: {
+dir: "rtl",
+switcher: "English",
+subtitle: "ملك لـ كتيكت للوجبات السريعة",
+formTitle: "نموذج إدخال المواد",
+lblSrNo: "الرقم التسلسلي",
+lblItemCode: "رمز المادة",
+lblItemName: "اسم المادة",
+lblDesc: "الوصف",
+lblDept: "القسم",
+lblLoc: "الموقع",
+lblStatus: "الحالة",
+optActive: "نشط",
+optInactive: "غير نشط",
+optMaint: "صيانة",
+btnSubmit: "حفظ وإنشاء رمز QR",
+tableTitle: "المواد المخزنة في المستودع",
+thSr: "الرقم",
+thCode: "الرمز",
+thName: "اسم المادة",
+thDept: "القسم / الموقع",
+thStatus: "الحالة",
+thAction: "رمز QR",
+btnAction: "عرض QR",
+qrTitle: "رمز QR",
+btnPrint: "طباعة ملصق QR",
+alertSuccess: "تم حفظ البيانات بنجاح!",
+scanTitle: "تفاصيل المادة الممسوحة"
+}
+};
+let currentLang = "en";
+let localItemsList = [];
+// Language Switcher Logic
+document.getElementById("langSwitcher").addEventListener("click", () => {
+currentLang = currentLang === "en" ? "ar" : "en";
+applyLanguage(currentLang);
+});
+function applyLanguage(lang) {
+const data = translations[lang];
+document.documentElement.dir = data.dir;
+document.documentElement.lang = lang;
+document.getElementById("langSwitcher").innerText = data.switcher;
+document.getElementById("headerSubtitle").innerText = data.subtitle;
+document.getElementById("formTitle").innerText = data.formTitle;
+document.getElementById("lblSrNo").innerText = data.lblSrNo;
+document.getElementById("lblItemCode").innerText = data.lblItemCode;
+document.getElementById("lblItemName").innerText = data.lblItemName;
+document.getElementById("lblDesc").innerText = data.lblDesc;
+document.getElementById("lblDept").innerText = data.lblDept;
+document.getElementById("lblLoc").innerText = data.lblLoc;
+document.getElementById("lblStatus").innerText = data.lblStatus;
+document.getElementById("optActive").innerText = data.optActive;
+document.getElementById("optInactive").innerText = data.optInactive;
+document.getElementById("optMaint").innerText = data.optMaint;
+document.getElementById("btnSubmit").innerText = data.btnSubmit;
+document.getElementById("tableTitle").innerText = data.tableTitle;
+document.getElementById("thSr").innerText = data.thSr;
+document.getElementById("thCode").innerText = data.thCode;
+document.getElementById("thName").innerText = data.thName;
+document.getElementById("thDept").innerText = data.thDept;
+document.getElementById("thStatus").innerText = data.thStatus;
+document.getElementById("thAction").innerText = data.thAction;
+document.getElementById("btnPrint").innerText = data.btnPrint;
+document.getElementById("scanViewTitle").innerText = data.scanTitle;
+renderTable();
+}
+// Save Data to Firestore
+document.getElementById("inventoryForm").addEventListener("submit", async (e) => {
+e.preventDefault();
+const itemData = {
+srNo: parseInt(document.getElementById("srNo").value),
+itemCode: document.getElementById("itemCode").value,
+itemName: document.getElementById("itemName").value,
+description: document.getElementById("description").value,
+department: document.getElementById("department").value,
+location: document.getElementById("location").value,
+status: document.getElementById("status").value,
+timestamp: new Date()
+};
+try {
+const docRef = await addDoc(inventoryCollection, itemData);
+document.getElementById("inventoryForm").reset();
+showQRCode(docRef.id, itemData.itemName, itemData.itemCode);
+alert(translations[currentLang].alertSuccess);
+} catch (error) {
+console.error("Error adding document: ", error);
+alert("Database Error! Please check your Firebase Config and Firestore Rules.");
+}
+});
+// Live Database Sync Listener
+onSnapshot(inventoryCollection, (snapshot) => {
+localItemsList = [];
+snapshot.forEach(doc => localItemsList.push({ id: doc.id, ...doc.data() }));
+localItemsList.sort((a, b) => a.srNo - b.srNo);
+renderTable();
+});
+// Render Table Component
+function renderTable() {
+const tableBody = document.getElementById("inventoryTableBody");
+tableBody.innerHTML = "";
+if (localItemsList.length === 0) {
+tableBody.innerHTML = <tr><td colspan="6" class="p-4 text-center text-gray-400">No items found. Add your first item!</td></tr>;
+return;
+}
+localItemsList.forEach((item) => {
+const row = document.createElement("tr");
+row.className = "hover:bg-gray-50 transition";
+let statusColor = "bg-green-100 text-green-800";
+let statusText = translations[currentLang].optActive;
+if (item.status === "Inactive") {
+statusColor = "bg-red-100 text-red-800";
+statusText = translations[currentLang].optInactive;
+} else if (item.status === "Maintenance") {
+statusColor = "bg-yellow-100 text-yellow-800";
+statusText = translations[currentLang].optMaint;
+}
+row.innerHTML = `
+${item.srNo}
+${item.itemCode}
+${item.itemName}
+\({item.department}<br><span class="text-xs text-gray-400">\){item.location}
+${statusText}
+`;
+tableBody.appendChild(row);
+});
+document.querySelectorAll(".scan-qr-btn").forEach(button => {
+button.addEventListener("click", (e) => {
+const docId = e.target.getAttribute("data-id");
+const itemName = e.target.getAttribute("data-name");
+const itemCode = e.target.getAttribute("data-code");
+showQRCode(docId, itemName, itemCode);
+});
+});
+}
+// QR Link Engine
+function showQRCode(id, name, code) {
+const baseURL = window.location.href.split('?')[0];
+const scanTargetURL = ${baseURL}?viewItem=${id};
+document.getElementById("qrPanel").classList.remove("hidden");
+document.getElementById("qrTitle").innerText = ${name} (${code});
+document.getElementById("qrLinkText").innerText = scanTargetURL;
+qrcodeInstance.clear();
+qrcodeInstance.makeCode(scanTargetURL);
+}
+// Deep URL Scan Routing
+window.addEventListener('DOMContentLoaded', async () => {
+const urlParams = new URLSearchParams(window.location.search);
+const viewItemId = urlParams.get('viewItem');
+if (viewItemId) {
+document.getElementById("mainDashboard").classList.add("hidden");
+const scanCard = document.getElementById("scannedItemView");
+const detailsBox = document.getElementById("scannedItemDetails");
+scanCard.classList.remove("hidden");
+detailsBox.innerHTML = <p class="text-gray-500">Fetching item details from cloud...</p>;
+try {
+const docRef = doc(db, "items", viewItemId);
+const docSnap = await getDoc(docRef);
+if (docSnap.exists()) {
+const data = docSnap.data();
+detailsBox.innerHTML = <div class="bg-gray-50 p-4 rounded-lg border space-y-2"> <p><strong>Sr. No:</strong> ${data.srNo}</p> <p><strong>Item Code:</strong> <span class="font-mono text-blue-700 font-bold">${data.itemCode}</span></p> <p><strong>Item Name:</strong> ${data.itemName}</p> <p><strong>Description:</strong> ${data.description || 'N/A'}</p> <p><strong>Department:</strong> ${data.department}</p> <p><strong>Location:</strong> ${data.location}</p> <p><strong>Status:</strong> <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold">${data.status}</span></p> </div>;
+} else {
+detailsBox.innerHTML = <p class="text-red-500 font-semibold">Item not found in database!</p>;
+}
+} catch (err) {
+detailsBox.innerHTML = <p class="text-red-500">Error loading item details.</p>;
+}
+}
+});
+window.closeScannedView = function() {
+window.location.href = window.location.href.split('?')[0];
+};
