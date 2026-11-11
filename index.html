@@ -742,4 +742,45 @@
         async function deleteItem(id) {
             if (currentUser.role !== "admin") return alert("Only Admin can delete!");
             if (confirm("Delete this item?")) {
-                await
+                await deleteDoc(doc(db, "items", id));
+                alert("Item deleted!");
+            }
+        }
+
+        function showQRCode(id, name, code) {
+            const baseURL = window.location.href.split('?')[0];
+            const scanTargetURL = `${baseURL}?viewItem=${id}`;
+            document.getElementById("qrPanel").classList.remove("hidden");
+            document.getElementById("qrTitle").innerText = `${name} (${code})`;
+            document.getElementById("qrLinkText").innerText = scanTargetURL;
+            qrcodeInstance.clear();
+            qrcodeInstance.makeCode(scanTargetURL);
+        }
+
+        window.exportToExcel = function() {
+            if (localItemsList.length === 0) return alert("No data!");
+            const exportData = localItemsList.map(item => ({
+                "Sr. No": item.srNo, "Item Code": item.itemCode, "Item Name": item.itemName,
+                "Description": item.description || "", "Purchase Date": item.purchaseDate || "",
+                "Warranty Date": item.warrantyDate || "", "Department": item.department,
+                "Location": item.location, "Status": item.status, "Remarks": item.remarks
+            }));
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Inventory");
+            XLSX.writeFile(workbook, "Ktayat_IT_Inventory.xlsx");
+        }
+
+        window.exportToPDF = function() {
+            if (localItemsList.length === 0) return alert("No data!");
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(16);
+            doc.text("KTAYKIT IT INV - Inventory Report", 14, 15);
+            const tableData = localItemsList.map(item => [item.srNo, item.itemCode, item.itemName, item.department, item.location, item.status, item.purchaseDate || '-']);
+            doc.autoTable({ startY: 25, head: [['Sr. No', 'Code', 'Item Name', 'Department', 'Location', 'Status', 'Purchase']], body: tableData, theme: 'grid' });
+            doc.save("Ktayat_IT_Inventory.pdf");
+        }
+    </script>
+</body>
+</html>
