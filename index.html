@@ -1,92 +1,122 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KTAYKIT IT INV - Inventory Management</title>
-    <!-- Tailwind CSS for Design -->
-    <script src="https://jsdelivr.net"></script>
+    <title>KTAYKIT IT INV - Property of Ktaykit Fast Food</title>
+    <!-- Tailwind CSS -->
+    <script src="https://tailwindcss.com"></script>
     <!-- QRCode.js Library -->
     <script src="https://cloudflare.com"></script>
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #qrPanel, #qrPanel * { visibility: visible; }
+            #qrPanel { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
+            #btnPrint { display: none; }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans p-6">
+<body class="bg-gray-100 font-sans p-4 md:p-6 transition-all duration-300">
 
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <header class="bg-blue-600 text-white p-4 rounded-t-lg shadow-md flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-wide">KTAYKIT IT INV</h1>
-            <span class="text-sm bg-blue-700 px-3 py-1 rounded">Live Database Connected</span>
+        <header class="bg-blue-700 text-white p-5 rounded-t-xl shadow-md flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold tracking-wide">KTAYKIT IT INV</h1>
+                <p id="headerSubtitle" class="text-xs md:text-sm text-blue-200 font-medium mt-1">Property of Ktaykit Fast Food</p>
+            </div>
+            
+            <!-- Language Switcher -->
+            <button id="langSwitcher" class="bg-blue-900 hover:bg-blue-950 text-white font-semibold py-2 px-5 rounded-lg text-sm transition cursor-pointer shadow">
+                العربية
+            </button>
         </header>
 
+        <!-- Single Item View Modal/Card (Opens when QR is scanned) -->
+        <div id="scannedItemView" class="hidden mt-6 bg-white p-6 md:p-8 rounded-xl shadow-lg border-t-4 border-blue-600 max-w-2xl mx-auto">
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                <h2 id="scanViewTitle" class="text-xl font-bold text-gray-800">Item Details</h2>
+                <button onclick="closeScannedView()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium">Back to Inventory</button>
+            </div>
+            <div id="scannedItemDetails" class="space-y-3 text-gray-700">
+                <!-- Scanned item data loads here -->
+            </div>
+        </div>
+
         <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <div id="mainDashboard" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             
-            <!-- Data Entry Form Side -->
-            <div class="bg-white p-6 rounded-lg shadow-md h-fit">
-                <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Item Entry Form</h2>
+            <!-- Data Entry Form -->
+            <div class="bg-white p-6 rounded-xl shadow-md h-fit">
+                <h2 id="formTitle" class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Item Entry Form</h2>
                 <form id="inventoryForm" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-600">Sr. No</label>
-                        <input type="number" id="srNo" required class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label id="lblSrNo" class="block text-sm font-semibold text-gray-700">Sr. No</label>
+                        <input type="number" id="srNo" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600">Item Code</label>
-                        <input type="text" id="itemCode" required class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label id="lblItemCode" class="block text-sm font-semibold text-gray-700">Item Code</label>
+                        <input type="text" id="itemCode" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600">Item Name</label>
-                        <input type="text" id="itemName" required class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label id="lblItemName" class="block text-sm font-semibold text-gray-700">Item Name</label>
+                        <input type="text" id="itemName" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600">Description</label>
-                        <textarea id="description" rows="2" class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                        <label id="lblDesc" class="block text-sm font-semibold text-gray-700">Description</label>
+                        <textarea id="description" rows="2" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600">Department</label>
-                        <input type="text" id="department" required class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label id="lblDept" class="block text-sm font-semibold text-gray-700">Department</label>
+                        <input type="text" id="department" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600">Location</label>
-                        <input type="text" id="location" required class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label id="lblLoc" class="block text-sm font-semibold text-gray-700">Location</label>
+                        <input type="text" id="location" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-600">Status</label>
-                        <select id="status" class="w-full mt-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                            <option value="Maintenance">Maintenance</option>
+                        <label id="lblStatus" class="block text-sm font-semibold text-gray-700">Status</label>
+                        <select id="status" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <option value="Active" id="optActive">Active</option>
+                            <option value="Inactive" id="optInactive">Inactive</option>
+                            <option value="Maintenance" id="optMaint">Maintenance</option>
                         </select>
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded shadow transition">Save to Cloud & Generate QR</button>
+                    <button type="submit" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow transition cursor-pointer">Save & Generate QR</button>
                 </form>
             </div>
 
-            <!-- Inventory List and QR View Side -->
+            <!-- Right Side: QR Display & Data Table -->
             <div class="lg:col-span-2 space-y-6">
-                <!-- QR Code Viewer Panel -->
-                <div id="qrPanel" class="bg-white p-6 rounded-lg shadow-md hidden flex flex-col items-center justify-center text-center">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2" id="qrTitle">Generated QR Code</h3>
-                    <div id="qrcode" class="p-2 bg-white border mb-4"></div>
-                    <p class="text-sm text-gray-500 mb-2" id="qrLinkText"></p>
-                    <button onclick="window.print()" class="bg-gray-800 text-white text-xs px-4 py-2 rounded hover:bg-gray-900">Print QR Code</button>
+                
+                <!-- QR Code Box -->
+                <div id="qrPanel" class="bg-white p-6 rounded-xl shadow-md hidden flex flex-col items-center justify-center text-center border border-gray-200">
+                    <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Property of Ktaykit Fast Food</p>
+                    <h3 class="text-lg font-bold text-gray-800 mb-3" id="qrTitle">Generated QR Code</h3>
+                    <div id="qrcode" class="p-3 bg-white border-2 border-gray-300 rounded-lg mb-3"></div>
+                    <p class="text-xs text-gray-500 mb-4 max-w-md break-all" id="qrLinkText"></p>
+                    <button id="btnPrint" onclick="window.print()" class="bg-gray-800 text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-gray-900 cursor-pointer shadow">Print QR Label</button>
                 </div>
 
-                <!-- Live Data Table -->
-                <div class="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Stored Inventory Items</h2>
-                    <table class="w-full text-left border-collapse text-sm">
+                <!-- Data Table -->
+                <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
+                    <h2 id="tableTitle" class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Stored Inventory Items</h2>
+                    <table class="w-full text-start border-collapse text-sm">
                         <thead>
-                            <tr class="bg-gray-100 text-gray-700 border-b">
-                                <th class="p-3">Sr. No</th>
-                                <th class="p-3">Code</th>
-                                <th class="p-3">Item Name</th>
-                                <th class="p-3">Dept / Location</th>
-                                <th class="p-3">Status</th>
-                                <th class="p-3 text-center">Action</th>
+                            <tr class="bg-gray-100 text-gray-700 border-b border-gray-200">
+                                <th id="thSr" class="p-3 text-start">Sr. No</th>
+                                <th id="thCode" class="p-3 text-start">Code</th>
+                                <th id="thName" class="p-3 text-start">Item Name</th>
+                                <th id="thDept" class="p-3 text-start">Dept / Location</th>
+                                <th id="thStatus" class="p-3 text-start">Status</th>
+                                <th id="thAction" class="p-3 text-center">QR Code</th>
                             </tr>
                         </thead>
                         <tbody id="inventoryTableBody" class="divide-y divide-gray-200">
-                            <!-- Live database rows will load here -->
+                            <tr>
+                                <td colspan="6" class="p-4 text-center text-gray-400">Loading data from database...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -95,95 +125,226 @@
         </div>
     </div>
 
-    <!-- Firebase SDK Modules -->
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://gstatic.com";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://gstatic.com";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, getDoc } from "https://gstatic.com";
 
-        // --- আপনার Firebase Config এখানে বসান ---
-      const firebaseConfig = {
-  apiKey: "AIzaSyAlE4LI7njD-0eMU5dYBY8OXTirIOQomZY",
-  authDomain: "ktaykit-inv.firebaseapp.com",
-  projectId: "ktaykit-inv",
-  storageBucket: "ktaykit-inv.firebasestorage.app",
-  messagingSenderId: "868506335870",
-  appId: "1:868506335870:web:a2d40d3175a4068ea3f62f",
-  measurementId: "G-XWLKHBBKM0"
-};
-
-// Initialize Firebase
-
+        // --- আপনার FIREBASE CONFIG এখানে বসান ---
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
-        // Firebase ইনিশিয়ালাইজেশন
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const inventoryCollection = collection(db, "items");
 
-        // QR কোড দেখানোর ভ্যারিয়েবল
         const qrContainer = document.getElementById("qrcode");
-        let qrcodeInstance = new QRCode(qrContainer, { width: 150, height: 150 });
+        let qrcodeInstance = new QRCode(qrContainer, { width: 160, height: 160 });
 
-        // ১. ডাটাবেসে নতুন ডাটা সেভ করা
-        document.getElementById("inventoryForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const itemData = {
-                srNo: parseInt(document.getElementById("srNo").value),
-                itemCode: document.getElementById("itemCode").value,
-                itemName: document.getElementById("itemName").value,
-                description: document.getElementById("description").value,
-                department: document.getElementById("department").value,
-                location: document.getElementById("location").value,
-                status: document.getElementById("status").value,
-                timestamp: new Date()
-            };
-
-            try {
-                // cloud firestore এ সেভ হচ্ছে
-                await addDoc(inventoryCollection, itemData);
-                document.getElementById("inventoryForm").reset();
-                alert("Data Successfully Saved to Cloud Database!");
-            } catch (error) {
-                console.error("Error adding document: ", error);
-                alert("Failed to save data.");
-            }
-        });
-
-        // ২. ডাটাবেস থেকে রিয়েল-টাইমে ডাটা টেবিলে দেখানো
-        onSnapshot(inventoryCollection, (snapshot) => {
-            const tableBody = document.getElementById("inventoryTableBody");
-            tableBody.innerHTML = "";
-
-            // ডাটাগুলোকে Sr. No অনুযায়ী সাজানো হচ্ছে
-            const docs = [];
-            snapshot.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
-            docs.sort((a, b) => a.srNo - b.srNo);
-
-            docs.forEach((item) => {
-                const row = document.createElement("tr");
-                row.className = "hover:bg-gray-50 transition";
-                
-                let statusColor = "bg-green-100 text-green-800";
-                if(item.status === "Inactive") statusColor = "bg-red-100 text-red-800";
-                if(item.status === "Maintenance") statusColor = "bg-yellow-100 text-yellow-800";
-
-                row.innerHTML = `
-                    <td class="p-3 font-medium text-gray-700">${item.srNo}</td>
-                    <td class="p-3 text-gray-600 font-mono">${item.itemCode}</td>
-                    <td class="p-3 text-gray-900 font-semibold">${item.itemName}</td>
-                    <td class="p-3 text-gray-500">${item.department} <br> <span class="text-xs text-gray-400">${item.location}</span></td>
-                    <td class="p-3"><span class="px-2 py-1 text-xs rounded-full ${statusColor}">${item.status}</span></td>
-                    <td class="p-3 text-center">
-                        <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded shadow scan-qr-btn" 
-                                data-id="${item.id}" data-name="${item.itemName}">
-                            View/Generate QR
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-
-            // প্রতিটি বাটনে QR কোড জেনারেট করার লজিক যুক্ত করা
-            document.querySelectorAll(".scan-qr-btn").forEach(button => {
-                button.addEventListener("click", (e) => {
+        const translations = {
+            en: {
+                dir: "ltr",
+                switcher: "العربية",
+                subtitle: "Property of Ktaykit Fast Food",
+                formTitle: "Item Entry Form",
+                lblSrNo: "Sr. No",
+                lblItemCode: "Item Code",
+                lblItemName: "Item Name",
+                lblDesc: "Description",
+                lblDept: "Department",
+                lblLoc: "Location",
+                lblStatus: "Status",
+                optActive: "Active",
+                optInactive: "Inactive",
+                optMaint: "Maintenance",
+                btnSubmit: "Save & Generate QR",
+                tableTitle: "Stored Inventory Items",
+                thSr: "Sr. No",
+                thCode: "Code",
+                thName: "Item Name",
+                thDept: "Dept / Location",
+                thStatus: "Status",
+                thAction: "QR Code",
+                btnAction: "Show QR",
+                qrTitle: "QR Code",
+btnPrint: "Print QR Label",
+alertSuccess: "Data Successfully Saved!",
+scanTitle: "Scanned Item Details"
+},
+ar: {
+dir: "rtl",
+switcher: "English",
+subtitle: "ملك لـ كتيكت للوجبات السريعة",
+formTitle: "نموذج إدخال المواد",
+lblSrNo: "الرقم التسلسلي",
+lblItemCode: "رمز المادة",
+lblItemName: "اسم المادة",
+lblDesc: "الوصف",
+lblDept: "القسم",
+lblLoc: "الموقع",
+lblStatus: "الحالة",
+optActive: "نشط",
+optInactive: "غير نشط",
+optMaint: "صيانة",
+btnSubmit: "حفظ وإنشاء رمز QR",
+tableTitle: "المواد المخزنة في المستودع",
+thSr: "الرقم",
+thCode: "الرمز",
+thName: "اسم المادة",
+thDept: "القسم / الموقع",
+thStatus: "الحالة",
+thAction: "رمز QR",
+btnAction: "عرض QR",
+qrTitle: "رمز QR",
+btnPrint: "طباعة ملصق QR",
+alertSuccess: "تم حفظ البيانات بنجاح!",
+scanTitle: "تفاصيل المادة الممسوحة"
+}
+};
+let currentLang = "en";
+let localItemsList = [];
+// Language Toggle
+document.getElementById("langSwitcher").addEventListener("click", () => {
+currentLang = currentLang === "en" ? "ar" : "en";
+applyLanguage(currentLang);
+});
+function applyLanguage(lang) {
+const data = translations[lang];
+document.documentElement.dir = data.dir;
+document.documentElement.lang = lang;
+document.getElementById("langSwitcher").innerText = data.switcher;
+document.getElementById("headerSubtitle").innerText = data.subtitle;
+document.getElementById("formTitle").innerText = data.formTitle;
+document.getElementById("lblSrNo").innerText = data.lblSrNo;
+document.getElementById("lblItemCode").innerText = data.lblItemCode;
+document.getElementById("lblItemName").innerText = data.lblItemName;
+document.getElementById("lblDesc").innerText = data.lblDesc;
+document.getElementById("lblDept").innerText = data.lblDept;
+document.getElementById("lblLoc").innerText = data.lblLoc;
+document.getElementById("lblStatus").innerText = data.lblStatus;
+document.getElementById("optActive").innerText = data.optActive;
+document.getElementById("optInactive").innerText = data.optInactive;
+document.getElementById("optMaint").innerText = data.optMaint;
+document.getElementById("btnSubmit").innerText = data.btnSubmit;
+document.getElementById("tableTitle").innerText = data.tableTitle;
+document.getElementById("thSr").innerText = data.thSr;
+document.getElementById("thCode").innerText = data.thCode;
+document.getElementById("thName").innerText = data.thName;
+document.getElementById("thDept").innerText = data.thDept;
+document.getElementById("thStatus").innerText = data.thStatus;
+document.getElementById("thAction").innerText = data.thAction;
+document.getElementById("btnPrint").innerText = data.btnPrint;
+document.getElementById("scanViewTitle").innerText = data.scanTitle;
+renderTable();
+}
+// Save Data
+document.getElementById("inventoryForm").addEventListener("submit", async (e) => {
+e.preventDefault();
+const itemData = {
+srNo: parseInt(document.getElementById("srNo").value),
+itemCode: document.getElementById("itemCode").value,
+itemName: document.getElementById("itemName").value,
+description: document.getElementById("description").value,
+department: document.getElementById("department").value,
+location: document.getElementById("location").value,
+status: document.getElementById("status").value,
+timestamp: new Date()
+};
+try {
+const docRef = await addDoc(inventoryCollection, itemData);
+document.getElementById("inventoryForm").reset();
+showQRCode(docRef.id, itemData.itemName, itemData.itemCode);
+alert(translations[currentLang].alertSuccess);
+} catch (error) {
+console.error("Error: ", error);
+alert("Database Error! Check your Firebase Config & Rules.");
+}
+});
+// Fetch Live Data
+onSnapshot(inventoryCollection, (snapshot) => {
+localItemsList = [];
+snapshot.forEach(doc => localItemsList.push({ id: doc.id, ...doc.data() }));
+localItemsList.sort((a, b) => a.srNo - b.srNo);
+renderTable();
+});
+// Render Table
+function renderTable() {
+const tableBody = document.getElementById("inventoryTableBody");
+tableBody.innerHTML = "";
+if (localItemsList.length === 0) {
+tableBody.innerHTML = <tr><td colspan="6" class="p-4 text-center text-gray-400">No items found. Add your first item!</td></tr>;
+return;
+}
+localItemsList.forEach((item) => {
+const row = document.createElement("tr");
+row.className = "hover:bg-gray-50 transition";
+let statusColor = "bg-green-100 text-green-800";
+let statusText = translations[currentLang].optActive;
+if (item.status === "Inactive") {
+statusColor = "bg-red-100 text-red-800";
+statusText = translations[currentLang].optInactive;
+} else if (item.status === "Maintenance") {
+statusColor = "bg-yellow-100 text-yellow-800";
+statusText = translations[currentLang].optMaint;
+}
+row.innerHTML = `
+${item.srNo}
+${item.itemCode}
+${item.itemName}
+\({item.department}<br><span class="text-xs text-gray-400">\){item.location}
+${statusText}
+`;
+tableBody.appendChild(row);
+});
+document.querySelectorAll(".scan-qr-btn").forEach(button => {
+button.addEventListener("click", (e) => {
+const docId = e.target.getAttribute("data-id");
+const itemName = e.target.getAttribute("data-name");
+const itemCode = e.target.getAttribute("data-code");
+showQRCode(docId, itemName, itemCode);
+});
+});
+}
+// Generate QR Code
+function showQRCode(id, name, code) {
+const baseURL = window.location.href.split('?')[0];
+const scanTargetURL = ${baseURL}?viewItem=${id};
+document.getElementById("qrPanel").classList.remove("hidden");
+document.getElementById("qrTitle").innerText = ${name} (${code});
+document.getElementById("qrLinkText").innerText = scanTargetURL;
+qrcodeInstance.clear();
+qrcodeInstance.makeCode(scanTargetURL);
+}
+// Handle QR Scan Page Load
+window.addEventListener('DOMContentLoaded', async () => {
+const urlParams = new URLSearchParams(window.location.search);
+const viewItemId = urlParams.get('viewItem');
+if (viewItemId) {
+document.getElementById("mainDashboard").classList.add("hidden");
+const scanCard = document.getElementById("scannedItemView");
+const detailsBox = document.getElementById("scannedItemDetails");
+scanCard.classList.remove("hidden");
+detailsBox.innerHTML = <p class="text-gray-500">Fetching item details from cloud...</p>;
+try {
+const docRef = doc(db, "items", viewItemId);
+const docSnap = await getDoc(docRef);
+if (docSnap.exists()) {
+const data = docSnap.data();
+detailsBox.innerHTML = <div class="bg-gray-50 p-4 rounded-lg border space-y-2"> <p><strong>Sr. No:</strong> ${data.srNo}</p> <p><strong>Item Code:</strong> <span class="font-mono text-blue-700 font-bold">${data.itemCode}</span></p> <p><strong>Item Name:</strong> ${data.itemName}</p> <p><strong>Description:</strong> ${data.description || 'N/A'}</p> <p><strong>Department:</strong> ${data.department}</p> <p><strong>Location:</strong> ${data.location}</p> <p><strong>Status:</strong> <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold">${data.status}</span></p> </div>;
+} else {
+detailsBox.innerHTML = <p class="text-red-500 font-semibold">Item not found in database!</p>;
+}
+} catch (err) {
+detailsBox.innerHTML = <p class="text-red-500">Error loading item details.</p>;
+}
+}
+});
+window.closeScannedView = function() {
+window.location.href = window.location.href.split('?')[0];
+};
