@@ -48,20 +48,30 @@
                 <h2 id="formTitle" class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Item Entry Form</h2>
                 <form id="inventoryForm" class="space-y-4">
                     <div>
-                        <label id="lblSrNo" class="block text-sm font-semibold text-gray-700">Sr. No</label>
-                        <input type="number" id="srNo" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label id="lblSrNo" class="block text-sm font-semibold text-gray-700">Sr. No (Auto 4-Digit)</label>
+                        <input type="text" id="srNo" readonly class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg bg-gray-100 font-mono text-gray-600 cursor-not-allowed">
                     </div>
                     <div>
-                        <label id="lblItemCode" class="block text-sm font-semibold text-gray-700">Item Code</label>
-                        <input type="text" id="itemCode" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label id="lblItemCode" class="block text-sm font-semibold text-gray-700">Item Code (Auto)</label>
+                        <input type="text" id="itemCode" readonly class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg bg-gray-100 font-mono text-gray-600 cursor-not-allowed">
                     </div>
                     <div>
                         <label id="lblItemName" class="block text-sm font-semibold text-gray-700">Item Name</label>
-                        <input type="text" id="itemName" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="text" id="itemName" required placeholder="e.g. Dell Laptop" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
                         <label id="lblDesc" class="block text-sm font-semibold text-gray-700">Description</label>
                         <textarea id="description" rows="2" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label id="lblPurchaseDate" class="block text-sm font-semibold text-gray-700">Purchase Date</label>
+                            <input type="date" id="purchaseDate" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        </div>
+                        <div>
+                            <label id="lblWarranty" class="block text-sm font-semibold text-gray-700">Warranty Date</label>
+                            <input type="date" id="warrantyDate" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        </div>
                     </div>
                     <div>
                         <label id="lblDept" class="block text-sm font-semibold text-gray-700">Department</label>
@@ -78,6 +88,10 @@
                             <option value="Inactive" id="optInactive">Inactive</option>
                             <option value="Maintenance" id="optMaint">Maintenance</option>
                         </select>
+                    </div>
+                    <div>
+                        <label id="lblRemarks" class="block text-sm font-semibold text-gray-700">Remarks</label>
+                        <input type="text" id="remarks" placeholder="Optional notes..." class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <button type="submit" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow transition cursor-pointer">Save & Generate QR</button>
                 </form>
@@ -103,14 +117,16 @@
                                 <th id="thSr" class="p-3 text-start">Sr. No</th>
                                 <th id="thCode" class="p-3 text-start">Code</th>
                                 <th id="thName" class="p-3 text-start">Item Name</th>
-                                <th id="thDept" class="p-3 text-start">Dept / Location</th>
+                                <th id="thDates" class="p-3 text-start">Purchase / Warranty</th>
+                                <th id="thDept" class="p-3 text-start">Dept / Loc</th>
                                 <th id="thStatus" class="p-3 text-start">Status</th>
+                                <th id="thRemarks" class="p-3 text-start">Remarks</th>
                                 <th id="thAction" class="p-3 text-center">QR Code</th>
                             </tr>
                         </thead>
-                        <tbody id="inventoryTableBody" class="divide-y divide-gray-200">
+                        <tbody id="inventoryTableBody">
                             <tr>
-                                <td colspan="6" class="p-4 text-center text-gray-400">Loading data from database...</td>
+                                <td colspan="8" class="p-4 text-center text-gray-400">Loading data from database...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -124,7 +140,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // --- আপনার Firebase Config এখানে সঠিকভাবে বসান ---
+        // --- আপনার Firebase Config এখানে বসান ---
         const firebaseConfig = {
             apiKey: "AIzaSyADezVnAvMNfKi5QnMJ-uBUHBKpckXRtV0",
             authDomain: "kty-inv.firebaseapp.com",
@@ -144,25 +160,25 @@
         const translations = {
             en: {
                 dir: "ltr", switcher: "العربية", subtitle: "Property of Ktaykit Fast Food",
-                formTitle: "Item Entry Form", lblSrNo: "Sr. No", lblItemCode: "Item Code",
-                lblItemName: "Item Name", lblDesc: "Description", lblDept: "Department",
-                lblLoc: "Location", lblStatus: "Status", optActive: "Active",
-                optInactive: "Inactive", optMaint: "Maintenance", btnSubmit: "Save & Generate QR",
-                tableTitle: "Stored Inventory Items", thSr: "Sr. No", thCode: "Code",
-                thName: "Item Name", thDept: "Dept / Location", thStatus: "Status",
-                thAction: "QR Code", btnAction: "Show QR", qrTitle: "QR Code",
-                btnPrint: "Print QR Label", alertSuccess: "Data Successfully Saved!", scanTitle: "Scanned Item Details"
+                formTitle: "Item Entry Form", lblSrNo: "Sr. No (Auto 4-Digit)", lblItemCode: "Item Code (Auto)",
+                lblItemName: "Item Name", lblDesc: "Description", lblPurchaseDate: "Purchase Date",
+                lblWarranty: "Warranty Date", lblDept: "Department", lblLoc: "Location", lblStatus: "Status",
+                lblRemarks: "Remarks", optActive: "Active", optInactive: "Inactive", optMaint: "Maintenance",
+                btnSubmit: "Save & Generate QR", tableTitle: "Stored Inventory Items", thSr: "Sr. No",
+                thCode: "Code", thName: "Item Name", thDates: "Purchase / Warranty", thDept: "Dept / Loc",
+                thStatus: "Status", thRemarks: "Remarks", thAction: "QR Code", btnAction: "Show QR",
+                qrTitle: "QR Code", btnPrint: "Print QR Label", alertSuccess: "Data Successfully Saved!", scanTitle: "Scanned Item Details"
             },
             ar: {
                 dir: "rtl", switcher: "English", subtitle: "ملك لـ كتيكت للوجبات السريعة",
-                formTitle: "نموذج إدخال المواد", lblSrNo: "الرقم التسلسلي", lblItemCode: "رمز المادة",
-                lblItemName: "اسم المادة", lblDesc: "الوصف", lblDept: "القسم",
-                lblLoc: "الموقع", lblStatus: "الحالة", optActive: "نشط",
-                optInactive: "غير نشط", optMaint: "صيانة", btnSubmit: "حفظ وإنشاء رمز QR",
-                tableTitle: "المواد المخزنة في المستودع", thSr: "الرقم", thCode: "الرمز",
-                thName: "اسم المادة", thDept: "القسم / الموقع", thStatus: "الحالة",
-                thAction: "رمز QR", btnAction: "عرض QR", qrTitle: "رمز QR",
-                btnPrint: "طباعة ملصق QR", alertSuccess: "تم حفظ البيانات بنجاح!", scanTitle: "تفاصيل المادة الممسوحة"
+                formTitle: "نموذج إدخال المواد", lblSrNo: "الرقم التسلسلي (تلقائي 4 أرقام)", lblItemCode: "رمز المادة (تلقائي)",
+                lblItemName: "اسم المادة", lblDesc: "الوصف", lblPurchaseDate: "تاريخ الشراء",
+                lblWarranty: "تاريخ الضمان", lblDept: "القسم", lblLoc: "الموقع", lblStatus: "الحالة",
+                lblRemarks: "الملاحظات", optActive: "نشط", optInactive: "غير نشط", optMaint: "صيانة",
+                btnSubmit: "حفظ وإنشاء رمز QR", tableTitle: "المواد المخزنة في المستودع", thSr: "الرقم",
+                thCode: "الرمز", thName: "اسم المادة", thDates: "الشراء / الضمان", thDept: "القسم / الموقع",
+                thStatus: "الحالة", thRemarks: "الملاحظات", thAction: "رمز QR", btnAction: "عرض QR",
+                qrTitle: "رمز QR", printBtn: "طباعة ملصق QR", alertSuccess: "تم حفظ البيانات بنجاح!", scanTitle: "تفاصيل المادة الممسوحة"
             }
         };
 
@@ -185,9 +201,12 @@
             document.getElementById("lblItemCode").innerText = data.lblItemCode;
             document.getElementById("lblItemName").innerText = data.lblItemName;
             document.getElementById("lblDesc").innerText = data.lblDesc;
+            document.getElementById("lblPurchaseDate").innerText = data.lblPurchaseDate;
+            document.getElementById("lblWarranty").innerText = data.lblWarranty;
             document.getElementById("lblDept").innerText = data.lblDept;
             document.getElementById("lblLoc").innerText = data.lblLoc;
             document.getElementById("lblStatus").innerText = data.lblStatus;
+            document.getElementById("lblRemarks").innerText = data.lblRemarks;
             document.getElementById("optActive").innerText = data.optActive;
             document.getElementById("optInactive").innerText = data.optInactive;
             document.getElementById("optMaint").innerText = data.optMaint;
@@ -196,29 +215,49 @@
             document.getElementById("thSr").innerText = data.thSr;
             document.getElementById("thCode").innerText = data.thCode;
             document.getElementById("thName").innerText = data.thName;
+            document.getElementById("thDates").innerText = data.thDates;
             document.getElementById("thDept").innerText = data.thDept;
             document.getElementById("thStatus").innerText = data.thStatus;
+            document.getElementById("thRemarks").innerText = data.thRemarks;
             document.getElementById("thAction").innerText = data.thAction;
             document.getElementById("btnPrint").innerText = data.btnPrint;
             document.getElementById("scanViewTitle").innerText = data.scanTitle;
             renderTable();
         }
 
+        // Auto-generate Sr. No & Item Code when data updates
+        function generateAutoValues() {
+            let nextNum = 1;
+            if (localItemsList.length > 0) {
+                const maxSr = Math.max(...localItemsList.map(item => parseInt(item.srNo) || 0));
+                nextNum = maxSr + 1;
+            }
+            const formattedSr = String(nextNum).padStart(4, '0');
+            const randomCode = 'KT-' + Math.floor(1000 + Math.random() * 9000);
+            
+            document.getElementById("srNo").value = formattedSr;
+            document.getElementById("itemCode").value = randomCode;
+        }
+
         document.getElementById("inventoryForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             const itemData = {
-                srNo: parseInt(document.getElementById("srNo").value),
+                srNo: document.getElementById("srNo").value,
                 itemCode: document.getElementById("itemCode").value,
                 itemName: document.getElementById("itemName").value,
                 description: document.getElementById("description").value,
+                purchaseDate: document.getElementById("purchaseDate").value,
+                warrantyDate: document.getElementById("warrantyDate").value,
                 department: document.getElementById("department").value,
                 location: document.getElementById("location").value,
                 status: document.getElementById("status").value,
+                remarks: document.getElementById("remarks").value || '-',
                 timestamp: new Date()
             };
             try {
                 const docRef = await addDoc(inventoryCollection, itemData);
                 document.getElementById("inventoryForm").reset();
+                generateAutoValues(); // Refresh auto values for next entry
                 showQRCode(docRef.id, itemData.itemName, itemData.itemCode);
                 alert(translations[currentLang].alertSuccess);
             } catch (error) {
@@ -230,23 +269,24 @@
         onSnapshot(inventoryCollection, (snapshot) => {
             localItemsList = [];
             snapshot.forEach(doc => localItemsList.push({ id: doc.id, ...doc.data() }));
-            localItemsList.sort((a, b) => a.srNo - b.srNo);
+            localItemsList.sort((a, b) => parseInt(a.srNo) - parseInt(b.srNo));
+            generateAutoValues();
             renderTable();
         }, (error) => {
             console.error("Firestore Error:", error);
-            document.getElementById("inventoryTableBody").innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-500">Database Connection Error: ${error.message}</td></tr>`;
+            document.getElementById("inventoryTableBody").innerHTML = `<tr><td colspan="8" class="p-4 text-center text-red-500">Database Connection Error: ${error.message}</td></tr>`;
         });
 
         function renderTable() {
             const tableBody = document.getElementById("inventoryTableBody");
             tableBody.innerHTML = "";
             if (localItemsList.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">No items found. Add your first item!</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-gray-400">No items found. Add your first item!</td></tr>`;
                 return;
             }
             localItemsList.forEach((item) => {
                 const row = document.createElement("tr");
-                row.className = "hover:bg-gray-50 transition";
+                row.className = "hover:bg-gray-50 transition border-b border-gray-100";
                 let statusColor = "bg-green-100 text-green-800";
                 let statusText = translations[currentLang].optActive;
                 if (item.status === "Inactive") {
@@ -257,11 +297,13 @@
                     statusText = translations[currentLang].optMaint;
                 }
                 row.innerHTML = `
-                    <td class="p-3 font-medium text-gray-700">${item.srNo}</td>
-                    <td class="p-3 font-mono text-gray-600">${item.itemCode}</td>
+                    <td class="p-3 font-mono font-medium text-gray-700">${item.srNo}</td>
+                    <td class="p-3 font-mono text-blue-600 font-semibold">${item.itemCode}</td>
                     <td class="p-3 font-semibold text-gray-900">${item.itemName}</td>
+                    <td class="p-3 text-xs text-gray-600">P: ${item.purchaseDate || 'N/A'}<br>W: ${item.warrantyDate || 'N/A'}</td>
                     <td class="p-3 text-gray-500">${item.department} <br> <span class="text-xs text-gray-400">${item.location}</span></td>
                     <td class="p-3"><span class="px-2.5 py-1 text-xs rounded-full font-medium ${statusColor}">${statusText}</span></td>
+                    <td class="p-3 text-gray-600 text-xs">${item.remarks}</td>
                     <td class="p-3 text-center">
                         <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg shadow cursor-pointer scan-qr-btn" data-id="${item.id}" data-name="${item.itemName}" data-code="${item.itemCode}">
                             ${translations[currentLang].btnAction}
@@ -312,9 +354,12 @@
                                 <p><strong>Item Code:</strong> <span class="font-mono text-blue-700 font-bold">${data.itemCode}</span></p>
                                 <p><strong>Item Name:</strong> ${data.itemName}</p>
                                 <p><strong>Description:</strong> ${data.description || 'N/A'}</p>
+                                <p><strong>Purchase Date:</strong> ${data.purchaseDate || 'N/A'}</p>
+                                <p><strong>Warranty Date:</strong> ${data.warrantyDate || 'N/A'}</p>
                                 <p><strong>Department:</strong> ${data.department}</p>
                                 <p><strong>Location:</strong> ${data.location}</p>
                                 <p><strong>Status:</strong> <span class="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold text-xs">${data.status}</span></p>
+                                <p><strong>Remarks:</strong> ${data.remarks || 'N/A'}</p>
                             </div>
                         `;
                     } else {
