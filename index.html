@@ -23,10 +23,10 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans p-4 md:p-6 transition-all duration-300">
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 font-sans p-4 md:p-6 transition-all duration-300 min-h-screen">
 
     <!-- LOGIN SCREEN -->
-    <div id="loginScreen" class="max-w-md mx-auto mt-16 bg-white p-8 rounded-2xl shadow-xl border-t-4 border-blue-600">
+    <div id="loginScreen" class="max-w-md mx-auto mt-16 bg-white p-8 rounded-2xl shadow-2xl border-t-4 border-blue-600">
         <div class="text-center mb-6">
             <h1 class="text-2xl font-bold text-gray-800">KTAYKIT IT INV</h1>
             <p class="text-xs text-gray-500 mt-1">Property of Ktaykit Fast Food</p>
@@ -35,9 +35,7 @@
         <form id="loginForm" class="space-y-4">
             <div>
                 <label class="block text-sm font-semibold text-gray-700">Select User / Role</label>
-                <select id="loginRoleSelect" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium">
-                    <!-- Dynamic users -->
-                </select>
+                <select id="loginRoleSelect" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium"></select>
             </div>
             <div>
                 <label class="block text-sm font-semibold text-gray-700">Password</label>
@@ -48,105 +46,143 @@
     </div>
 
     <!-- MAIN APP CONTAINER -->
-    <div id="appContainer" class="max-w-7xl mx-auto hidden">
+    <div id="appContainer" class="max-w-7xl mx-auto hidden space-y-6">
         <!-- Header -->
-        <header class="bg-blue-700 text-white p-5 rounded-t-xl shadow-md flex justify-between items-center">
+        <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-5 rounded-2xl shadow-lg flex justify-between items-center">
             <div>
-                <h1 class="text-2xl md:text-3xl font-bold tracking-wide">KTAYKIT IT INV</h1>
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide">KTAYKIT IT INV</h1>
                 <p id="headerSubtitle" class="text-xs md:text-sm text-blue-200 font-medium mt-1">Property of Ktaykit Fast Food</p>
             </div>
             <div class="flex items-center gap-3">
-                <span id="loggedInUserBadge" class="bg-blue-900 text-xs px-3 py-1.5 rounded-lg font-semibold border border-blue-500"></span>
-                <button id="langSwitcher" class="bg-blue-900 hover:bg-blue-950 text-white font-semibold py-2 px-4 rounded-lg text-sm transition cursor-pointer shadow">
+                <span id="loggedInUserBadge" class="bg-blue-900/80 text-xs px-3.5 py-2 rounded-xl font-semibold border border-blue-400 backdrop-blur-sm"></span>
+                <button id="langSwitcher" class="bg-indigo-900 hover:bg-indigo-950 text-white font-semibold py-2 px-4 rounded-xl text-sm transition cursor-pointer shadow">
                     العربية
                 </button>
-                <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition cursor-pointer shadow">
+                <button onclick="logout()" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 px-4 rounded-xl text-sm transition cursor-pointer shadow">
                     Logout
                 </button>
             </div>
         </header>
 
         <!-- Admin Control Bar -->
-        <div id="adminControlBar" class="hidden mt-4 bg-white p-4 rounded-xl shadow border flex flex-col md:flex-row justify-between items-center gap-3">
+        <div id="adminControlBar" class="hidden bg-white p-4 rounded-2xl shadow-md border flex flex-col md:flex-row justify-between items-center gap-3">
             <div class="flex items-center gap-2">
                 <span class="text-amber-600 font-bold">⚠️ Pending Authorizations:</span>
-                <span id="pendingCount" class="bg-amber-200 text-amber-900 px-2.5 py-0.5 rounded-full text-xs font-bold">0</span>
-                <button onclick="openApprovalModal()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow cursor-pointer ml-2">Review Requests</button>
+                <span id="pendingCount" class="bg-amber-100 text-amber-800 px-3 py-0.5 rounded-full text-xs font-bold">0</span>
+                <button onclick="openApprovalModal()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow cursor-pointer ml-2">Review Requests</button>
             </div>
             <div class="flex flex-wrap gap-2">
-                <button onclick="openAddUserModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow cursor-pointer">➕ Add User</button>
-                <button onclick="openChangePasswordModal()" class="bg-gray-700 hover:bg-gray-800 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow cursor-pointer">🔑 Change Password</button>
+                <button onclick="openAddUserModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow cursor-pointer">➕ Add User</button>
+                <button onclick="openChangePasswordModal()" class="bg-gray-700 hover:bg-gray-800 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow cursor-pointer">🔑 Change Password</button>
+            </div>
+        </div>
+
+        <!-- ================= COLORED DASHBOARD / METRICS ================= -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-5 rounded-2xl shadow-lg flex items-center justify-between">
+                <div>
+                    <p class="text-xs uppercase font-bold tracking-wider text-blue-100">Total Items</p>
+                    <h3 id="dashTotalItems" class="text-3xl font-extrabold mt-1">0</h3>
+                </div>
+                <div class="bg-blue-400/30 p-3 rounded-xl text-2xl">📦</div>
+            </div>
+            <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white p-5 rounded-2xl shadow-lg flex items-center justify-between">
+                <div>
+                    <p class="text-xs uppercase font-bold tracking-wider text-emerald-100">Active Items</p>
+                    <h3 id="dashActiveItems" class="text-3xl font-extrabold mt-1">0</h3>
+                </div>
+                <div class="bg-emerald-400/30 p-3 rounded-xl text-2xl">🟢</div>
+            </div>
+            <div class="bg-gradient-to-br from-amber-500 to-amber-700 text-white p-5 rounded-2xl shadow-lg flex items-center justify-between">
+                <div>
+                    <p class="text-xs uppercase font-bold tracking-wider text-amber-100">Maintenance</p>
+                    <h3 id="dashMaintItems" class="text-3xl font-extrabold mt-1">0</h3>
+                </div>
+                <div class="bg-amber-400/30 p-3 rounded-xl text-2xl">🛠️</div>
+            </div>
+            <div class="bg-gradient-to-br from-rose-500 to-rose-700 text-white p-5 rounded-2xl shadow-lg flex items-center justify-between">
+                <div>
+                    <p class="text-xs uppercase font-bold tracking-wider text-rose-100">Damaged / Inactive</p>
+                    <h3 id="dashDamageItems" class="text-3xl font-extrabold mt-1">0</h3>
+                </div>
+                <div class="bg-rose-400/30 p-3 rounded-xl text-2xl">⚠️</div>
+            </div>
+        </div>
+
+        <!-- Branch & Department Summary Widget -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-100">
+                <h3 class="font-bold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">🏢 Department Wise Report</h3>
+                <div id="deptSummaryList" class="space-y-2 max-h-48 overflow-y-auto text-sm"></div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-100">
+                <h3 class="font-bold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">📍 Location / Branch Report</h3>
+                <div id="locSummaryList" class="space-y-2 max-h-48 overflow-y-auto text-sm"></div>
             </div>
         </div>
 
         <!-- Scanned Item View -->
-        <div id="scannedItemView" class="hidden mt-6 bg-white p-6 md:p-8 rounded-xl shadow-lg border-t-4 border-blue-600 max-w-2xl mx-auto">
+        <div id="scannedItemView" class="hidden bg-white p-6 md:p-8 rounded-2xl shadow-xl border-t-4 border-blue-600 max-w-2xl mx-auto">
             <div class="flex justify-between items-center border-b pb-4 mb-4">
-                <h2 id="scanViewTitle" class="text-xl font-bold text-gray-800">Item Details</h2>
-                <button onclick="closeScannedView()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium">Back to Inventory</button>
+                <h2 id="scanViewTitle" class="text-xl font-bold text-gray-800">Scanned Item Information</h2>
+                <button onclick="closeScannedView()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3.5 py-1.5 rounded-xl text-sm font-medium cursor-pointer">Back to Home</button>
             </div>
             <div id="scannedItemDetails" class="space-y-3 text-gray-700"></div>
         </div>
 
         <!-- Main Content Grid -->
-        <div id="mainDashboard" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <div id="mainDashboard" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Data Entry Form -->
-            <div class="bg-white p-6 rounded-xl shadow-md h-fit">
+            <div class="bg-white p-6 rounded-2xl shadow-md h-fit border border-gray-100">
                 <h2 id="formTitle" class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Item Entry Form</h2>
                 <form id="inventoryForm" class="space-y-4">
                     <input type="hidden" id="editingDocId" value="">
                     <div>
                         <label id="lblSrNo" class="block text-sm font-semibold text-gray-700">Sr. No (Auto)</label>
-                        <input type="text" id="srNo" readonly class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg bg-gray-100 font-mono text-gray-600 cursor-not-allowed">
+                        <input type="text" id="srNo" readonly class="w-full mt-1 p-3 border border-gray-300 rounded-xl bg-gray-50 font-mono text-gray-600 cursor-not-allowed">
                     </div>
                     <div>
                         <label id="lblItemCode" class="block text-sm font-semibold text-gray-700">Item Code (Auto)</label>
-                        <input type="text" id="itemCode" readonly class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg bg-gray-100 font-mono text-gray-600 cursor-not-allowed">
+                        <input type="text" id="itemCode" readonly class="w-full mt-1 p-3 border border-gray-300 rounded-xl bg-gray-50 font-mono text-gray-600 cursor-not-allowed">
                     </div>
                     <div>
                         <label id="lblItemName" class="block text-sm font-semibold text-gray-700">Item Name</label>
-                        <input type="text" id="itemName" required placeholder="e.g. Dell Laptop" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="text" id="itemName" required placeholder="e.g. Dell Laptop" class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
                         <label id="lblDesc" class="block text-sm font-semibold text-gray-700">Description</label>
-                        <textarea id="description" rows="2" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                        <textarea id="description" rows="2" class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label id="lblPurchaseDate" class="block text-sm font-semibold text-gray-700">Purchase Date</label>
-                            <input type="date" id="purchaseDate" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <input type="date" id="purchaseDate" required class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                         </div>
                         <div>
                             <label id="lblWarranty" class="block text-sm font-semibold text-gray-700">Warranty Date</label>
-                            <input type="date" id="warrantyDate" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <input type="date" id="warrantyDate" required class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                         </div>
                     </div>
                     
-                    <!-- Department Field with Direct Add Button -->
                     <div>
                         <div class="flex justify-between items-center">
                             <label id="lblDept" class="block text-sm font-semibold text-gray-700">Department</label>
                             <button type="button" onclick="openAddDepartmentModal()" class="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer">+ Add New</button>
                         </div>
-                        <select id="department" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                            <!-- Populated dynamically -->
-                        </select>
+                        <select id="department" class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white"></select>
                     </div>
 
-                    <!-- Location Field with Direct Add Button -->
                     <div>
                         <div class="flex justify-between items-center">
-                            <label id="lblLoc" class="block text-sm font-semibold text-gray-700">Location</label>
+                            <label id="lblLoc" class="block text-sm font-semibold text-gray-700">Location / Branch</label>
                             <button type="button" onclick="openAddLocationModal()" class="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer">+ Add New</button>
                         </div>
-                        <select id="location" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                            <!-- Populated dynamically -->
-                        </select>
+                        <select id="location" class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white"></select>
                     </div>
 
                     <div>
                         <label id="lblStatus" class="block text-sm font-semibold text-gray-700">Status</label>
-                        <select id="status" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        <select id="status" class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                             <option value="Active" id="optActive">Active</option>
                             <option value="Inactive" id="optInactive">Inactive</option>
                             <option value="Maintenance" id="optMaint">Maintenance</option>
@@ -155,40 +191,36 @@
                     </div>
                     <div>
                         <label id="lblRemarks" class="block text-sm font-semibold text-gray-700">Remarks</label>
-                        <input type="text" id="remarks" placeholder="Optional notes..." class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="text" id="remarks" placeholder="Optional notes..." class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div class="flex gap-2">
-                        <button type="submit" id="btnSubmit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow transition cursor-pointer">Add Item & QR</button>
-                        <button type="button" id="btnCancelEdit" onclick="cancelEditMode()" class="hidden bg-gray-500 hover:bg-gray-600 text-white font-semibold px-4 py-2.5 rounded-lg shadow transition cursor-pointer">Cancel</button>
+                        <button type="submit" id="btnSubmit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow transition cursor-pointer">Add Item & QR</button>
+                        <button type="button" id="btnCancelEdit" onclick="cancelEditMode()" class="hidden bg-gray-500 hover:bg-gray-600 text-white font-semibold px-4 py-3 rounded-xl shadow transition cursor-pointer">Cancel</button>
                     </div>
                 </form>
             </div>
 
             <!-- Right Side: QR Display & Data Table -->
             <div class="lg:col-span-2 space-y-6">
-                <div id="qrPanel" class="bg-white p-6 rounded-xl shadow-md hidden flex flex-col items-center justify-center text-center border border-gray-200">
-                    <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Property of Ktaykit Fast Food</p>
+                <div id="qrPanel" class="bg-white p-6 rounded-2xl shadow-md hidden flex flex-col items-center justify-center text-center border border-gray-100">
+                    <p class="text-xs font-extrabold text-blue-600 uppercase tracking-wider mb-1">Property of Ktaykit Fast Food</p>
                     <h3 class="text-lg font-bold text-gray-800 mb-3" id="qrTitle">Generated QR Code</h3>
-                    <div id="qrcode" class="p-3 bg-white border-2 border-gray-300 rounded-lg mb-3 inline-block"></div>
+                    <div id="qrcode" class="p-3 bg-white border-2 border-gray-200 rounded-xl mb-3 inline-block shadow-inner"></div>
                     <p class="text-xs text-gray-500 mb-4 max-w-md break-all" id="qrLinkText"></p>
-                    <button id="btnPrint" onclick="window.print()" class="bg-gray-800 text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-gray-900 cursor-pointer shadow">Print QR Label</button>
+                    <button id="btnPrint" onclick="window.print()" class="bg-gray-800 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-gray-900 cursor-pointer shadow">Print QR Label</button>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
+                <div class="bg-white p-6 rounded-2xl shadow-md overflow-x-auto border border-gray-100">
                     <div class="flex flex-col sm:flex-row justify-between items-center border-b pb-4 mb-4 gap-3">
                         <h2 id="tableTitle" class="text-xl font-bold text-gray-800">Stored Inventory Items</h2>
                         <div class="flex gap-2">
-                            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow cursor-pointer flex items-center gap-1.5">
-                                📊 Export Excel
-                            </button>
-                            <button onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow cursor-pointer flex items-center gap-1.5">
-                                📄 Export PDF
-                            </button>
+                            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow cursor-pointer flex items-center gap-1.5">📊 Export Excel</button>
+                            <button onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow cursor-pointer flex items-center gap-1.5">📄 Export PDF</button>
                         </div>
                     </div>
                     <table class="w-full text-start border-collapse text-sm">
                         <thead>
-                            <tr class="bg-gray-100 text-gray-700 border-b border-gray-200">
+                            <tr class="bg-gray-50 text-gray-700 border-b border-gray-200">
                                 <th id="thSr" class="p-3 text-start">Sr. No</th>
                                 <th id="thCode" class="p-3 text-start">Code</th>
                                 <th id="thName" class="p-3 text-start">Item Name</th>
@@ -200,9 +232,7 @@
                             </tr>
                         </thead>
                         <tbody id="inventoryTableBody">
-                            <tr>
-                                <td colspan="8" class="p-4 text-center text-gray-400">Loading data from database...</td>
-                            </tr>
+                            <tr><td colspan="8" class="p-4 text-center text-gray-400">Loading data from database...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -210,30 +240,29 @@
         </div>
     </div>
 
-    <!-- Modals for Add Department & Location -->
+    <!-- Modals -->
     <div id="addDeptModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white max-w-sm w-full p-6 rounded-2xl shadow-xl space-y-3">
+        <div class="bg-white max-w-sm w-full p-6 rounded-2xl shadow-2xl space-y-3">
             <div class="flex justify-between items-center border-b pb-2">
                 <h3 class="font-bold text-gray-800">Add New Department</h3>
                 <button onclick="closeAddDeptModal()" class="text-gray-500 font-bold">&times;</button>
             </div>
-            <input type="text" id="customDeptInput" placeholder="Enter department name..." class="w-full p-2.5 border rounded-lg outline-none">
-            <button onclick="saveNewDepartment()" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg cursor-pointer">Add Department</button>
+            <input type="text" id="customDeptInput" placeholder="Enter department name..." class="w-full p-3 border rounded-xl outline-none">
+            <button onclick="saveNewDepartment()" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl cursor-pointer">Add Department</button>
         </div>
     </div>
 
     <div id="addLocModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white max-w-sm w-full p-6 rounded-2xl shadow-xl space-y-3">
+        <div class="bg-white max-w-sm w-full p-6 rounded-2xl shadow-2xl space-y-3">
             <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-gray-800">Add New Location</h3>
+                <h3 class="font-bold text-gray-800">Add New Location / Branch</h3>
                 <button onclick="closeAddLocModal()" class="text-gray-500 font-bold">&times;</button>
             </div>
-            <input type="text" id="customLocInput" placeholder="Enter location name..." class="w-full p-2.5 border rounded-lg outline-none">
-            <button onclick="saveNewLocation()" class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg cursor-pointer">Add Location</button>
+            <input type="text" id="customLocInput" placeholder="Enter location/branch name..." class="w-full p-3 border rounded-xl outline-none">
+            <button onclick="saveNewLocation()" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl cursor-pointer">Add Location</button>
         </div>
     </div>
 
-    <!-- Approval Modal -->
     <div id="approvalModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-2xl w-full p-6 rounded-2xl shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -244,7 +273,6 @@
         </div>
     </div>
 
-    <!-- Add User Modal -->
     <div id="addUserModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -254,25 +282,24 @@
             <form id="addUserForm" class="space-y-3">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700">Username</label>
-                    <input type="text" id="newUsername" required class="w-full mt-1 p-2.5 border rounded-lg outline-none" placeholder="e.g. John">
+                    <input type="text" id="newUsername" required class="w-full mt-1 p-3 border rounded-xl outline-none" placeholder="e.g. John">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700">Role</label>
-                    <select id="newUserRole" class="w-full mt-1 p-2.5 border rounded-lg outline-none bg-white">
+                    <select id="newUserRole" class="w-full mt-1 p-3 border rounded-xl outline-none bg-white">
                         <option value="assistant_edit">IT Assistant (Editing Mode - No Delete)</option>
                         <option value="assistant_view">IT Assistant 1 (View Only - Needs Approval)</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700">Password</label>
-                    <input type="password" id="newUserPassword" required class="w-full mt-1 p-2.5 border rounded-lg outline-none">
+                    <input type="password" id="newUserPassword" required class="w-full mt-1 p-3 border rounded-xl outline-none">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg cursor-pointer">Save User</button>
+                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl cursor-pointer">Save User</button>
             </form>
         </div>
     </div>
 
-    <!-- Change Password Modal -->
     <div id="changePasswordModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -282,13 +309,13 @@
             <form id="changePasswordForm" class="space-y-3">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700">Select User</label>
-                    <select id="targetUserSelect" class="w-full mt-1 p-2.5 border rounded-lg outline-none bg-white"></select>
+                    <select id="targetUserSelect" class="w-full mt-1 p-3 border rounded-xl outline-none bg-white"></select>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700">New Password</label>
-                    <input type="password" id="targetNewPassword" required class="w-full mt-1 p-2.5 border rounded-lg outline-none">
+                    <input type="password" id="targetNewPassword" required class="w-full mt-1 p-3 border rounded-xl outline-none">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg cursor-pointer">Update Password</button>
+                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl cursor-pointer">Update Password</button>
             </form>
         </div>
     </div>
@@ -296,7 +323,7 @@
     <!-- Firebase SDK & Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // --- আপনার Firebase Config এখানে বসান ---
         const firebaseConfig = {
@@ -327,7 +354,7 @@
                 dir: "ltr", switcher: "العربية", subtitle: "Property of Ktaykit Fast Food",
                 formTitle: "Item Entry Form", lblSrNo: "Sr. No (Auto)", lblItemCode: "Item Code (Auto)",
                 lblItemName: "Item Name", lblDesc: "Description", lblPurchaseDate: "Purchase Date",
-                lblWarranty: "Warranty Date", lblDept: "Department", lblLoc: "Location", lblStatus: "Status",
+                lblWarranty: "Warranty Date", lblDept: "Department", lblLoc: "Location / Branch", lblStatus: "Status",
                 lblRemarks: "Remarks", optActive: "Active", optInactive: "Inactive", optMaint: "Maintenance", optDamage: "Damage",
                 btnSubmit: "Add Item & QR", btnUpdate: "Update Item", tableTitle: "Stored Inventory Items", thSr: "Sr. No",
                 thCode: "Code", thName: "Item Name", thDates: "Purchase / Warranty", thDept: "Dept / Loc",
@@ -338,7 +365,7 @@
                 dir: "rtl", switcher: "English", subtitle: "ملك لـ كتيكت للوجبات السريعة",
                 formTitle: "نموذج إدخال المواد", lblSrNo: "الرقم التسلسلي (تلقائي)", lblItemCode: "رمز المادة (تلقائي)",
                 lblItemName: "اسم المادة", lblDesc: "الوصف", lblPurchaseDate: "تاريخ الشراء",
-                lblWarranty: "تاريخ الضمان", lblDept: "القسم", lblLoc: "الموقع", lblStatus: "الحالة",
+                lblWarranty: "تاريخ الضمان", lblDept: "القسم", lblLoc: "الموقع / الفرع", lblStatus: "الحالة",
                 lblRemarks: "الملاحظات", optActive: "نشط", optInactive: "غير نشط", optMaint: "صيانة", optDamage: "تالف",
                 btnSubmit: "إضافة المادة ورمز QR", btnUpdate: "تحديث المادة", tableTitle: "المواد المخزنة في المستودع", thSr: "الرقم",
                 thCode: "الرمز", thName: "اسم المادة", thDates: "الشراء / الضمان", thDept: "القسم / الموقع",
@@ -351,19 +378,16 @@
         let localItemsList = [];
         let pendingRequestsList = [];
 
-        // Populate Dropdowns
         function updateDropdowns() {
             const deptSelect = document.getElementById("department");
             const locSelect = document.getElementById("location");
-            
             const currentDept = deptSelect.value;
             const currentLoc = locSelect.value;
 
             deptSelect.innerHTML = "";
             departmentsList.forEach(d => {
                 const opt = document.createElement("option");
-                opt.value = d;
-                opt.innerText = d;
+                opt.value = d; opt.innerText = d;
                 deptSelect.appendChild(opt);
             });
             if (departmentsList.includes(currentDept)) deptSelect.value = currentDept;
@@ -371,52 +395,34 @@
             locSelect.innerHTML = "";
             locationsList.forEach(l => {
                 const opt = document.createElement("option");
-                opt.value = l;
-                opt.innerText = l;
+                opt.value = l; opt.innerText = l;
                 locSelect.appendChild(opt);
             });
             if (locationsList.includes(currentLoc)) locSelect.value = currentLoc;
         }
 
-        // Add Dept Modal Actions
-        window.openAddDepartmentModal = function() {
-            document.getElementById("addDeptModal").classList.remove("hidden");
-            document.getElementById("customDeptInput").focus();
-        }
-        window.closeAddDeptModal = function() {
-            document.getElementById("addDeptModal").classList.add("hidden");
-            document.getElementById("customDeptInput").value = "";
-        }
+        window.openAddDepartmentModal = function() { document.getElementById("addDeptModal").classList.remove("hidden"); document.getElementById("customDeptInput").focus(); }
+        window.closeAddDeptModal = function() { document.getElementById("addDeptModal").classList.add("hidden"); document.getElementById("customDeptInput").value = ""; }
         window.saveNewDepartment = function() {
             const val = document.getElementById("customDeptInput").value.trim();
             if (val && !departmentsList.includes(val)) {
-                departmentsList.push(val);
-                updateDropdowns();
+                departmentsList.push(val); updateDropdowns();
                 document.getElementById("department").value = val;
             }
             closeAddDeptModal();
         }
 
-        // Add Loc Modal Actions
-        window.openAddLocationModal = function() {
-            document.getElementById("addLocModal").classList.remove("hidden");
-            document.getElementById("customLocInput").focus();
-        }
-        window.closeAddLocModal = function() {
-            document.getElementById("addLocModal").classList.add("hidden");
-            document.getElementById("customLocInput").value = "";
-        }
+        window.openAddLocationModal = function() { document.getElementById("addLocModal").classList.remove("hidden"); document.getElementById("customLocInput").focus(); }
+        window.closeAddLocModal = function() { document.getElementById("addLocModal").classList.add("hidden"); document.getElementById("customLocInput").value = ""; }
         window.saveNewLocation = function() {
             const val = document.getElementById("customLocInput").value.trim();
             if (val && !locationsList.includes(val)) {
-                locationsList.push(val);
-                updateDropdowns();
+                locationsList.push(val); updateDropdowns();
                 document.getElementById("location").value = val;
             }
             closeAddLocModal();
         }
 
-        // Fetch Users
         onSnapshot(usersCollection, async (snapshot) => {
             usersList = [];
             snapshot.forEach(doc => usersList.push({ id: doc.id, ...doc.data() }));
@@ -443,10 +449,7 @@
             const selectedId = document.getElementById("loginRoleSelect").value;
             const password = document.getElementById("loginPassword").value;
             const user = usersList.find(u => u.id === selectedId);
-            if (!user || user.password !== password) {
-                alert("Incorrect Password!");
-                return;
-            }
+            if (!user || user.password !== password) { alert("Incorrect Password!"); return; }
             currentUser = user;
             document.getElementById("loginScreen").classList.add("hidden");
             document.getElementById("appContainer").classList.remove("hidden");
@@ -496,8 +499,7 @@
             select.innerHTML = "";
             usersList.forEach(u => {
                 const opt = document.createElement("option");
-                opt.value = u.id;
-                opt.innerText = `${u.name} (${u.role})`;
+                opt.value = u.id; opt.innerText = `${u.name} (${u.role})`;
                 select.appendChild(opt);
             });
             document.getElementById("changePasswordModal").classList.remove("hidden");
@@ -541,10 +543,9 @@
             renderTable();
         }
 
-        // Form Submit
         document.getElementById("inventoryForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-            if (currentUser.role === "assistant_view") return alert("View only mode!");
+            if (currentUser && currentUser.role === "assistant_view") return alert("View only mode!");
 
             const editId = document.getElementById("editingDocId").value;
             const itemData = {
@@ -562,7 +563,7 @@
             };
 
             try {
-                if (currentUser.role === "admin") {
+                if (!currentUser || currentUser.role === "admin") {
                     if (editId) {
                         await updateDoc(doc(db, "items", editId), itemData);
                         alert("Item updated!");
@@ -596,6 +597,7 @@
             snapshot.forEach(doc => localItemsList.push({ id: doc.id, ...doc.data() }));
             localItemsList.sort((a, b) => parseInt(a.srNo) - parseInt(b.srNo));
             if (!document.getElementById("editingDocId").value) generateAutoValues();
+            updateDashboardMetrics();
             renderTable();
         });
 
@@ -604,6 +606,38 @@
             snapshot.forEach(doc => pendingRequestsList.push({ id: doc.id, ...doc.data() }));
             document.getElementById("pendingCount").innerText = pendingRequestsList.length;
         });
+
+        function updateDashboardMetrics() {
+            const total = localItemsList.length;
+            const active = localItemsList.filter(i => i.status === "Active").length;
+            const maint = localItemsList.filter(i => i.status === "Maintenance").length;
+            const damage = localItemsList.filter(i => i.status === "Damage" || i.status === "Inactive").length;
+
+            document.getElementById("dashTotalItems").innerText = total;
+            document.getElementById("dashActiveItems").innerText = active;
+            document.getElementById("dashMaintItems").innerText = maint;
+            document.getElementById("dashDamageItems").innerText = damage;
+
+            // Department breakdown
+            const deptCounts = {};
+            const locCounts = {};
+            localItemsList.forEach(item => {
+                deptCounts[item.department] = (deptCounts[item.department] || 0) + 1;
+                locCounts[item.location] = (locCounts[item.location] || 0) + 1;
+            });
+
+            const deptListEl = document.getElementById("deptSummaryList");
+            deptListEl.innerHTML = "";
+            for (const [dept, count] of Object.entries(deptCounts)) {
+                deptListEl.innerHTML += `<div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-xl border"><span class="font-semibold text-gray-700">${dept}</span><span class="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full font-bold text-xs">${count} items</span></div>`;
+            }
+
+            const locListEl = document.getElementById("locSummaryList");
+            locListEl.innerHTML = "";
+            for (const [loc, count] of Object.entries(locCounts)) {
+                locListEl.innerHTML += `<div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-xl border"><span class="font-semibold text-gray-700">${loc}</span><span class="bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full font-bold text-xs">${count} items</span></div>`;
+            }
+        }
 
         function generateAutoValues() {
             if (document.getElementById("editingDocId").value !== "") return;
@@ -633,13 +667,13 @@
                 else if (item.status === "Maintenance") statusColor = "bg-yellow-100 text-yellow-800";
                 else if (item.status === "Damage") statusColor = "bg-rose-100 text-rose-900 font-bold";
 
-                let actionButtons = `<button class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1 rounded shadow cursor-pointer scan-qr-btn" data-id="${item.id}" data-name="${item.itemName}" data-code="${item.itemCode}">QR</button>`;
+                let actionButtons = `<button class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1.5 rounded-lg shadow cursor-pointer scan-qr-btn" data-id="${item.id}" data-name="${item.itemName}" data-code="${item.itemCode}">QR</button>`;
 
                 if (currentUser && currentUser.role !== "assistant_view") {
-                    actionButtons += `<button class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1 rounded shadow cursor-pointer edit-btn ml-1" data-id="${item.id}">Edit</button>`;
+                    actionButtons += `<button class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1.5 rounded-lg shadow cursor-pointer edit-btn ml-1" data-id="${item.id}">Edit</button>`;
                 }
                 if (currentUser && currentUser.role === "admin") {
-                    actionButtons += `<button class="bg-red-600 hover:bg-red-700 text-white text-xs px-2.5 py-1 rounded shadow cursor-pointer delete-btn ml-1" data-id="${item.id}">Delete</button>`;
+                    actionButtons += `<button class="bg-red-600 hover:bg-red-700 text-white text-xs px-2.5 py-1.5 rounded-lg shadow cursor-pointer delete-btn ml-1" data-id="${item.id}">Delete</button>`;
                 }
 
                 row.innerHTML = `
@@ -682,8 +716,8 @@
                             <p class="text-xs text-gray-400">Code: ${req.data.itemCode} | Dept: ${req.data.department}</p>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="approveRequest('${req.id}')" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded font-semibold cursor-pointer">Authorize</button>
-                            <button onclick="rejectRequest('${req.id}')" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded font-semibold cursor-pointer">Reject</button>
+                            <button onclick="approveRequest('${req.id}')" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold cursor-pointer">Authorize</button>
+                            <button onclick="rejectRequest('${req.id}')" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold cursor-pointer">Reject</button>
                         </div>
                     `;
                     list.appendChild(div);
@@ -726,7 +760,7 @@
             document.getElementById("location").value = item.location;
             document.getElementById("status").value = item.status;
             document.getElementById("remarks").value = item.remarks === '-' ? '' : item.remarks;
-            document.getElementById("btnSubmit").innerText = currentUser.role === "admin" ? "Update Item" : "Submit Update for Approval";
+            document.getElementById("btnSubmit").innerText = currentUser && currentUser.role === "admin" ? "Update Item" : "Submit Update for Approval";
             document.getElementById("btnCancelEdit").classList.remove("hidden");
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -740,7 +774,7 @@
         }
 
         async function deleteItem(id) {
-            if (currentUser.role !== "admin") return alert("Only Admin can delete!");
+            if (!currentUser || currentUser.role !== "admin") return alert("Only Admin can delete!");
             if (confirm("Delete this item?")) {
                 await deleteDoc(doc(db, "items", id));
                 alert("Item deleted!");
@@ -749,38 +783,4 @@
 
         function showQRCode(id, name, code) {
             const baseURL = window.location.href.split('?')[0];
-            const scanTargetURL = `${baseURL}?viewItem=${id}`;
-            document.getElementById("qrPanel").classList.remove("hidden");
-            document.getElementById("qrTitle").innerText = `${name} (${code})`;
-            document.getElementById("qrLinkText").innerText = scanTargetURL;
-            qrcodeInstance.clear();
-            qrcodeInstance.makeCode(scanTargetURL);
-        }
-
-        window.exportToExcel = function() {
-            if (localItemsList.length === 0) return alert("No data!");
-            const exportData = localItemsList.map(item => ({
-                "Sr. No": item.srNo, "Item Code": item.itemCode, "Item Name": item.itemName,
-                "Description": item.description || "", "Purchase Date": item.purchaseDate || "",
-                "Warranty Date": item.warrantyDate || "", "Department": item.department,
-                "Location": item.location, "Status": item.status, "Remarks": item.remarks
-            }));
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Inventory");
-            XLSX.writeFile(workbook, "Ktayat_IT_Inventory.xlsx");
-        }
-
-        window.exportToPDF = function() {
-            if (localItemsList.length === 0) return alert("No data!");
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(16);
-            doc.text("KTAYKIT IT INV - Inventory Report", 14, 15);
-            const tableData = localItemsList.map(item => [item.srNo, item.itemCode, item.itemName, item.department, item.location, item.status, item.purchaseDate || '-']);
-            doc.autoTable({ startY: 25, head: [['Sr. No', 'Code', 'Item Name', 'Department', 'Location', 'Status', 'Purchase']], body: tableData, theme: 'grid' });
-            doc.save("Ktayat_IT_Inventory.pdf");
-        }
-    </script>
-</body>
-</html>
+            const scanTargetURL
