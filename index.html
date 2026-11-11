@@ -8,6 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- QRCode.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- SheetJS (Excel Export) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- jsPDF & jsPDF-AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
         @media print {
             body * { visibility: hidden; }
@@ -19,18 +25,59 @@
 </head>
 <body class="bg-gray-100 font-sans p-4 md:p-6 transition-all duration-300">
 
-    <div class="max-w-7xl mx-auto">
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="max-w-md mx-auto mt-16 bg-white p-8 rounded-2xl shadow-xl border-t-4 border-blue-600">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">KTAYKIT IT INV</h1>
+            <p class="text-xs text-gray-500 mt-1">Property of Ktaykit Fast Food</p>
+            <p class="text-sm font-semibold text-blue-600 mt-3">Please Login to Continue</p>
+        </div>
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Select User / Role</label>
+                <select id="loginRoleSelect" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium">
+                    <!-- Dynamic users loaded here -->
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter password" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition cursor-pointer">Login to System</button>
+        </form>
+    </div>
+
+    <!-- MAIN APP CONTAINER (Hidden until login) -->
+    <div id="appContainer" class="max-w-7xl mx-auto hidden">
         <!-- Header -->
         <header class="bg-blue-700 text-white p-5 rounded-t-xl shadow-md flex justify-between items-center">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold tracking-wide">KTAYKIT IT INV</h1>
                 <p id="headerSubtitle" class="text-xs md:text-sm text-blue-200 font-medium mt-1">Property of Ktaykit Fast Food</p>
             </div>
-            <!-- Language Switcher -->
-            <button id="langSwitcher" class="bg-blue-900 hover:bg-blue-950 text-white font-semibold py-2 px-5 rounded-lg text-sm transition cursor-pointer shadow">
-                العربية
-            </button>
+            <div class="flex items-center gap-3">
+                <span id="loggedInUserBadge" class="bg-blue-900 text-xs px-3 py-1.5 rounded-lg font-semibold border border-blue-500"></span>
+                <button id="langSwitcher" class="bg-blue-900 hover:bg-blue-950 text-white font-semibold py-2 px-4 rounded-lg text-sm transition cursor-pointer shadow">
+                    العربية
+                </button>
+                <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition cursor-pointer shadow">
+                    Logout
+                </button>
+            </div>
         </header>
+
+        <!-- Admin Control Bar (Add User & Approvals) -->
+        <div id="adminControlBar" class="hidden mt-4 bg-white p-4 rounded-xl shadow border flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-2">
+                <span class="text-amber-600 font-bold">⚠️ Pending Authorizations:</span>
+                <span id="pendingCount" class="bg-amber-200 text-amber-900 px-2.5 py-0.5 rounded-full text-xs font-bold">0</span>
+                <button onclick="openApprovalModal()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow cursor-pointer ml-2">Review Requests</button>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="openAddUserModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow cursor-pointer">➕ Add New User</button>
+                <button onclick="openChangePasswordModal()" class="bg-gray-700 hover:bg-gray-800 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow cursor-pointer">🔑 Change Password</button>
+            </div>
+        </div>
 
         <!-- Scanned Item View -->
         <div id="scannedItemView" class="hidden mt-6 bg-white p-6 md:p-8 rounded-xl shadow-lg border-t-4 border-blue-600 max-w-2xl mx-auto">
@@ -53,7 +100,7 @@
                         <input type="text" id="srNo" readonly class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg bg-gray-100 font-mono text-gray-600 cursor-not-allowed">
                     </div>
                     <div>
-                        <label id="lblItemCode" class="block text-sm font-semibold text-gray-700">Item Code (Auto)</label>
+                        <label id="lblItemCode" class="block text-sm font-semibold text-gray-700">Item Code (Auto KTY-ITP-...)</label>
                         <input type="text" id="itemCode" readonly class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg bg-gray-100 font-mono text-gray-600 cursor-not-allowed">
                     </div>
                     <div>
@@ -74,7 +121,6 @@
                             <input type="date" id="warrantyDate" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                         </div>
                     </div>
-                    <!-- Department Dropdown with Add More -->
                     <div>
                         <label id="lblDept" class="block text-sm font-semibold text-gray-700">Department</label>
                         <select id="department" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white mb-2">
@@ -86,7 +132,6 @@
                         </select>
                         <input type="text" id="newDepartmentInput" placeholder="Enter new department..." class="hidden w-full p-2.5 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
-                    <!-- Location Dropdown with Add More -->
                     <div>
                         <label id="lblLoc" class="block text-sm font-semibold text-gray-700">Location</label>
                         <select id="location" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white mb-2">
@@ -112,7 +157,7 @@
                         <input type="text" id="remarks" placeholder="Optional notes..." class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div class="flex gap-2">
-                        <button type="submit" id="btnSubmit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow transition cursor-pointer">Save & Generate QR</button>
+                        <button type="submit" id="btnSubmit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow transition cursor-pointer">Add Item & QR</button>
                         <button type="button" id="btnCancelEdit" onclick="cancelEditMode()" class="hidden bg-gray-500 hover:bg-gray-600 text-white font-semibold px-4 py-2.5 rounded-lg shadow transition cursor-pointer">Cancel</button>
                     </div>
                 </form>
@@ -120,7 +165,6 @@
 
             <!-- Right Side: QR Display & Data Table -->
             <div class="lg:col-span-2 space-y-6">
-                <!-- QR Code Box -->
                 <div id="qrPanel" class="bg-white p-6 rounded-xl shadow-md hidden flex flex-col items-center justify-center text-center border border-gray-200">
                     <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Property of Ktaykit Fast Food</p>
                     <h3 class="text-lg font-bold text-gray-800 mb-3" id="qrTitle">Generated QR Code</h3>
@@ -129,9 +173,18 @@
                     <button id="btnPrint" onclick="window.print()" class="bg-gray-800 text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-gray-900 cursor-pointer shadow">Print QR Label</button>
                 </div>
 
-                <!-- Data Table -->
                 <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
-                    <h2 id="tableTitle" class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Stored Inventory Items</h2>
+                    <div class="flex flex-col sm:flex-row justify-between items-center border-b pb-4 mb-4 gap-3">
+                        <h2 id="tableTitle" class="text-xl font-bold text-gray-800">Stored Inventory Items</h2>
+                        <div class="flex gap-2">
+                            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow cursor-pointer flex items-center gap-1.5">
+                                📊 Export Excel
+                            </button>
+                            <button onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow cursor-pointer flex items-center gap-1.5">
+                                📄 Export PDF
+                            </button>
+                        </div>
+                    </div>
                     <table class="w-full text-start border-collapse text-sm">
                         <thead>
                             <tr class="bg-gray-100 text-gray-700 border-b border-gray-200">
@@ -156,10 +209,70 @@
         </div>
     </div>
 
-    <!-- Firebase SDK (Version 10 Stable) -->
+    <!-- Approval Modal -->
+    <div id="approvalModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-2xl w-full p-6 rounded-2xl shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-800">Pending Authorization Requests</h3>
+                <button onclick="closeApprovalModal()" class="text-gray-500 hover:text-gray-700 font-bold text-lg">&times;</button>
+            </div>
+            <div id="approvalList" class="space-y-3 max-h-96 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-800">Add New User</h3>
+                <button onclick="closeAddUserModal()" class="text-gray-500 hover:text-gray-700 font-bold text-lg">&times;</button>
+            </div>
+            <form id="addUserForm" class="space-y-3">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Username / Name</label>
+                    <input type="text" id="newUsername" required class="w-full mt-1 p-2.5 border rounded-lg outline-none" placeholder="e.g. John Doe">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Role / Permission</label>
+                    <select id="newUserRole" class="w-full mt-1 p-2.5 border rounded-lg outline-none bg-white">
+                        <option value="assistant_edit">IT Assistant (Editing Mode - No Delete)</option>
+                        <option value="assistant_view">IT Assistant 1 (View Only - Needs Approval)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Password</label>
+                    <input type="password" id="newUserPassword" required class="w-full mt-1 p-2.5 border rounded-lg outline-none" placeholder="Set password">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow cursor-pointer">Save New User</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-800">Change User Password</h3>
+                <button onclick="closeChangePasswordModal()" class="text-gray-500 hover:text-gray-700 font-bold text-lg">&times;</button>
+            </div>
+            <form id="changePasswordForm" class="space-y-3">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Select User</label>
+                    <select id="targetUserSelect" class="w-full mt-1 p-2.5 border rounded-lg outline-none bg-white"></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">New Password</label>
+                    <input type="password" id="targetNewPassword" required class="w-full mt-1 p-2.5 border rounded-lg outline-none" placeholder="Enter new password">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow cursor-pointer">Update Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK & Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // --- আপনার Firebase Config এখানে বসান ---
         const firebaseConfig = {
@@ -174,7 +287,11 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const inventoryCollection = collection(db, "items");
+        const requestsCollection = collection(db, "requests");
+        const usersCollection = collection(db, "users");
 
+        let currentUser = null;
+        let usersList = [];
         const qrContainer = document.getElementById("qrcode");
         let qrcodeInstance = new QRCode(qrContainer, { width: 160, height: 160 });
 
@@ -185,10 +302,10 @@
                 lblItemName: "Item Name", lblDesc: "Description", lblPurchaseDate: "Purchase Date",
                 lblWarranty: "Warranty Date", lblDept: "Department", lblLoc: "Location", lblStatus: "Status",
                 lblRemarks: "Remarks", optActive: "Active", optInactive: "Inactive", optMaint: "Maintenance", optDamage: "Damage",
-                btnSubmit: "Save & Generate QR", btnUpdate: "Update Item", tableTitle: "Stored Inventory Items", thSr: "Sr. No",
+                btnSubmit: "Add Item & QR", btnUpdate: "Update Item", tableTitle: "Stored Inventory Items", thSr: "Sr. No",
                 thCode: "Code", thName: "Item Name", thDates: "Purchase / Warranty", thDept: "Dept / Loc",
                 thStatus: "Status", thRemarks: "Remarks", thAction: "Actions", btnAction: "QR", btnEdit: "Edit", btnDel: "Delete",
-                qrTitle: "QR Code", btnPrint: "Print QR Label", alertSuccess: "Data Successfully Saved!", alertUpdate: "Data Successfully Updated!", scanTitle: "Scanned Item Details"
+                qrTitle: "QR Code", btnPrint: "Print QR Label", alertSuccess: "Item Successfully Added!", alertRequestSent: "Request sent to Admin!"
             },
             ar: {
                 dir: "rtl", switcher: "English", subtitle: "ملك لـ كتيكت للوجبات السريعة",
@@ -196,15 +313,144 @@
                 lblItemName: "اسم المادة", lblDesc: "الوصف", lblPurchaseDate: "تاريخ الشراء",
                 lblWarranty: "تاريخ الضمان", lblDept: "القسم", lblLoc: "الموقع", lblStatus: "الحالة",
                 lblRemarks: "الملاحظات", optActive: "نشط", optInactive: "غير نشط", optMaint: "صيانة", optDamage: "تالف",
-                btnSubmit: "حفظ وإنشاء رمز QR", btnUpdate: "تحديث المادة", tableTitle: "المواد المخزنة في المستودع", thSr: "الرقم",
+                btnSubmit: "إضافة المادة ورمز QR", btnUpdate: "تحديث المادة", tableTitle: "المواد المخزنة في المستودع", thSr: "الرقم",
                 thCode: "الرمز", thName: "اسم المادة", thDates: "الشراء / الضمان", thDept: "القسم / الموقع",
                 thStatus: "الحالة", thRemarks: "الملاحظات", thAction: "الإجراءات", btnAction: "QR", btnEdit: "تعديل", btnDel: "حذف",
-                qrTitle: "رمز QR", printBtn: "طباعة ملصق QR", alertSuccess: "تم حفظ البيانات بنجاح!", alertUpdate: "تم تحديث البيانات بنجاح!", scanTitle: "تفاصيل المادة الممسوحة"
+                qrTitle: "رمز QR", printBtn: "طباعة ملصق QR", alertSuccess: "تم إضافة المادة بنجاح!", alertRequestSent: "تم إرسال الطلب إلى المسؤول!"
             }
         };
 
         let currentLang = "en";
         let localItemsList = [];
+        let pendingRequestsList = [];
+
+        // Fetch Users from Firestore in Real-time
+        onSnapshot(usersCollection, async (snapshot) => {
+            usersList = [];
+            snapshot.forEach(doc => usersList.push({ id: doc.id, ...doc.data() }));
+
+            // If no users exist, create default Admin user (password: 123456)
+            if (usersList.length === 0) {
+                await setDoc(doc(usersCollection, "admin"), { name: "Administrator", role: "admin", password: "123456" });
+                return;
+            }
+            populateLoginDropdown();
+        });
+
+        function populateLoginDropdown() {
+            const select = document.getElementById("loginRoleSelect");
+            select.innerHTML = "";
+            usersList.forEach(u => {
+                const opt = document.createElement("option");
+                opt.value = u.id;
+                opt.innerText = `${u.name} (${u.role.toUpperCase()})`;
+                select.appendChild(opt);
+            });
+        }
+
+        // --- LOGIN HANDLER ---
+        document.getElementById("loginForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const selectedId = document.getElementById("loginRoleSelect").value;
+            const password = document.getElementById("loginPassword").value;
+
+            const user = usersList.find(u => u.id === selectedId);
+            if (!user || user.password !== password) {
+                alert("Incorrect Password!");
+                return;
+            }
+
+            currentUser = user;
+            document.getElementById("loginScreen").classList.add("hidden");
+            document.getElementById("appContainer").classList.remove("hidden");
+            document.getElementById("loggedInUserBadge").innerText = `👤 ${currentUser.name} (${currentUser.role})`;
+
+            applyPermissions();
+        });
+
+        window.logout = function() {
+            currentUser = null;
+            document.getElementById("appContainer").classList.add("hidden");
+            document.getElementById("loginScreen").classList.remove("hidden");
+            document.getElementById("inventoryForm").reset();
+            cancelEditMode();
+        }
+
+        function applyPermissions() {
+            const formInputs = document.querySelectorAll("#inventoryForm input, #inventoryForm textarea, #inventoryForm select, #btnSubmit");
+            if (currentUser.role === "assistant_view") {
+                formInputs.forEach(el => el.disabled = true);
+                document.getElementById("btnSubmit").innerText = "View Only Mode";
+                document.getElementById("btnSubmit").classList.add("opacity-50", "cursor-not-allowed");
+            } else {
+                formInputs.forEach(el => el.disabled = false);
+                document.getElementById("btnSubmit").classList.remove("opacity-50", "cursor-not-allowed");
+            }
+
+            if (currentUser.role === "admin") {
+                document.getElementById("adminControlBar").classList.remove("hidden");
+            } else {
+                document.getElementById("adminControlBar").classList.add("hidden");
+            }
+        }
+
+        // --- Add User Modal Functions ---
+        window.openAddUserModal = function() {
+            document.getElementById("addUserModal").classList.remove("hidden");
+        }
+        window.closeAddUserModal = function() {
+            document.getElementById("addUserModal").classList.add("hidden");
+            document.getElementById("addUserForm").reset();
+        }
+
+        document.getElementById("addUserForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const name = document.getElementById("newUsername").value.trim();
+            const role = document.getElementById("newUserRole").value;
+            const password = document.getElementById("newUserPassword").value;
+            const docId = name.toLowerCase().replace(/\s+/g, '_');
+
+            try {
+                await setDoc(doc(usersCollection, docId), { name, role, password });
+                alert("New user successfully created!");
+                closeAddUserModal();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to create user.");
+            }
+        });
+
+        // --- Change Password Modal Functions ---
+        window.openChangePasswordModal = function() {
+            const select = document.getElementById("targetUserSelect");
+            select.innerHTML = "";
+            usersList.forEach(u => {
+                const opt = document.createElement("option");
+                opt.value = u.id;
+                opt.innerText = `${u.name} (${u.role})`;
+                select.appendChild(opt);
+            });
+            document.getElementById("changePasswordModal").classList.remove("hidden");
+        }
+        window.closeChangePasswordModal = function() {
+            document.getElementById("changePasswordModal").classList.add("hidden");
+            document.getElementById("changePasswordForm").reset();
+        }
+
+        document.getElementById("changePasswordForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const targetId = document.getElementById("targetUserSelect").value;
+            const newPass = document.getElementById("targetNewPassword").value;
+
+            try {
+                await updateDoc(doc(usersCollection, targetId), { password: newPass });
+                alert("Password successfully updated!");
+                closeChangePasswordModal();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to update password.");
+            }
+        });
 
         document.getElementById("langSwitcher").addEventListener("click", () => {
             currentLang = currentLang === "en" ? "ar" : "en";
@@ -232,92 +478,20 @@
             document.getElementById("optInactive").innerText = data.optInactive;
             document.getElementById("optMaint").innerText = data.optMaint;
             document.getElementById("optDamage").innerText = data.optDamage;
-            
-            const isEditing = document.getElementById("editingDocId").value !== "";
-            document.getElementById("btnSubmit").innerText = isEditing ? data.btnUpdate : data.btnSubmit;
-            
-            document.getElementById("tableTitle").innerText = data.tableTitle;
-            document.getElementById("thSr").innerText = data.thSr;
-            document.getElementById("thCode").innerText = data.thCode;
-            document.getElementById("thName").innerText = data.thName;
-            document.getElementById("thDates").innerText = data.thDates;
-            document.getElementById("thDept").innerText = data.thDept;
-            document.getElementById("thStatus").innerText = data.thStatus;
-            document.getElementById("thRemarks").innerText = data.thRemarks;
-            document.getElementById("thAction").innerText = data.thAction;
-            document.getElementById("btnPrint").innerText = data.btnPrint;
-            document.getElementById("scanViewTitle").innerText = data.scanTitle;
             renderTable();
         }
 
-        // Handle Dynamic "Add New" Dropdowns
-        document.getElementById("department").addEventListener("change", (e) => {
-            const input = document.getElementById("newDepartmentInput");
-            if (e.target.value === "add_new") {
-                input.classList.remove("hidden");
-                input.required = true;
-                input.focus();
-            } else {
-                input.classList.add("hidden");
-                input.required = false;
-                input.value = "";
-            }
-        });
-
-        document.getElementById("location").addEventListener("change", (e) => {
-            const input = document.getElementById("newLocationInput");
-            if (e.target.value === "add_new") {
-                input.classList.remove("hidden");
-                input.required = true;
-                input.focus();
-            } else {
-                input.classList.add("hidden");
-                input.required = false;
-                input.value = "";
-            }
-        });
-
-        function generateAutoValues() {
-            if (document.getElementById("editingDocId").value !== "") return; // Don't change code during edit
-            let nextNum = 1;
-            if (localItemsList.length > 0) {
-                const maxSr = Math.max(...localItemsList.map(item => parseInt(item.srNo) || 0));
-                nextNum = maxSr + 1;
-            }
-            document.getElementById("srNo").value = String(nextNum).padStart(4, '0');
-            document.getElementById("itemCode").value = 'KT-' + Math.floor(1000 + Math.random() * 9000);
-        }
-
+        // Form Submit
         document.getElementById("inventoryForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-            const editId = document.getElementById("editingDocId").value;
-            
-            // Get Department Value
-            let dept = document.getElementById("department").value;
-            if (dept === "add_new") {
-                dept = document.getElementById("newDepartmentInput").value.trim();
-                // Add to dropdown dynamically
-                const select = document.getElementById("department");
-                const opt = document.createElement("option");
-                opt.value = dept;
-                opt.innerText = dept;
-                select.insertBefore(opt, select.lastElementChild);
-                select.value = dept;
-                document.getElementById("newDepartmentInput").classList.add("hidden");
-            }
+            if (currentUser.role === "assistant_view") return alert("View only mode!");
 
-            // Get Location Value
+            const editId = document.getElementById("editingDocId").value;
+            let dept = document.getElementById("department").value;
+            if (dept === "add_new") dept = document.getElementById("newDepartmentInput").value.trim();
+
             let loc = document.getElementById("location").value;
-            if (loc === "add_new") {
-                loc = document.getElementById("newLocationInput").value.trim();
-                const select = document.getElementById("location");
-                const opt = document.createElement("option");
-                opt.value = loc;
-                opt.innerText = loc;
-                select.insertBefore(opt, select.lastElementChild);
-                select.value = loc;
-                document.getElementById("newLocationInput").classList.add("hidden");
-            }
+            if (loc === "add_new") loc = document.getElementById("newLocationInput").value.trim();
 
             const itemData = {
                 srNo: document.getElementById("srNo").value,
@@ -334,23 +508,32 @@
             };
 
             try {
-                if (editId) {
-                    // Update existing item
-                    const docRef = doc(db, "items", editId);
-                    await updateDoc(docRef, itemData);
-                    alert(translations[currentLang].alertUpdate);
-                    cancelEditMode();
+                if (currentUser.role === "admin") {
+                    if (editId) {
+                        await updateDoc(doc(db, "items", editId), itemData);
+                        alert("Item updated!");
+                        cancelEditMode();
+                    } else {
+                        const docRef = await addDoc(inventoryCollection, itemData);
+                        showQRCode(docRef.id, itemData.itemName, itemData.itemCode);
+                        alert(translations[currentLang].alertSuccess);
+                    }
                 } else {
-                    // Add new item
-                    const docRef = await addDoc(inventoryCollection, itemData);
-                    showQRCode(docRef.id, itemData.itemName, itemData.itemCode);
-                    alert(translations[currentLang].alertSuccess);
+                    await addDoc(requestsCollection, {
+                        type: editId ? "UPDATE" : "ADD",
+                        targetId: editId || null,
+                        data: itemData,
+                        requestedBy: currentUser.name,
+                        timestamp: new Date()
+                    });
+                    alert(translations[currentLang].alertRequestSent);
+                    cancelEditMode();
                 }
                 document.getElementById("inventoryForm").reset();
                 generateAutoValues();
             } catch (error) {
-                console.error("Error: ", error);
-                alert("Database Error! Check your Firebase Rules & Config.");
+                console.error("Error:", error);
+                alert("Operation failed.");
             }
         });
 
@@ -358,36 +541,51 @@
             localItemsList = [];
             snapshot.forEach(doc => localItemsList.push({ id: doc.id, ...doc.data() }));
             localItemsList.sort((a, b) => parseInt(a.srNo) - parseInt(b.srNo));
-            if (!document.getElementById("editingDocId").value) {
-                generateAutoValues();
-            }
+            if (!document.getElementById("editingDocId").value) generateAutoValues();
             renderTable();
-        }, (error) => {
-            console.error("Firestore Error:", error);
-            document.getElementById("inventoryTableBody").innerHTML = `<tr><td colspan="8" class="p-4 text-center text-red-500">Database Connection Error: ${error.message}</td></tr>`;
         });
+
+        onSnapshot(requestsCollection, (snapshot) => {
+            pendingRequestsList = [];
+            snapshot.forEach(doc => pendingRequestsList.push({ id: doc.id, ...doc.data() }));
+            document.getElementById("pendingCount").innerText = pendingRequestsList.length;
+        });
+
+        function generateAutoValues() {
+            if (document.getElementById("editingDocId").value !== "") return;
+            let nextNum = 1;
+            if (localItemsList.length > 0) {
+                const maxSr = Math.max(...localItemsList.map(item => parseInt(item.srNo) || 0));
+                nextNum = maxSr + 1;
+            }
+            document.getElementById("srNo").value = String(nextNum).padStart(4, '0');
+            document.getElementById("itemCode").value = `KTY-ITP-${1100 + nextNum}`;
+        }
 
         function renderTable() {
             const tableBody = document.getElementById("inventoryTableBody");
             tableBody.innerHTML = "";
             if (localItemsList.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-gray-400">No items found. Add your first item!</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-gray-400">No items found.</td></tr>`;
                 return;
             }
             localItemsList.forEach((item) => {
                 const row = document.createElement("tr");
                 row.className = "hover:bg-gray-50 transition border-b border-gray-100";
+                
                 let statusColor = "bg-green-100 text-green-800";
-                let statusText = translations[currentLang].optActive;
-                if (item.status === "Inactive") {
-                    statusColor = "bg-red-100 text-red-800";
-                    statusText = translations[currentLang].optInactive;
-                } else if (item.status === "Maintenance") {
-                    statusColor = "bg-yellow-100 text-yellow-800";
-                    statusText = translations[currentLang].optMaint;
-                } else if (item.status === "Damage") {
-                    statusColor = "bg-rose-100 text-rose-900 font-bold";
-                    statusText = translations[currentLang].optDamage;
+                let statusText = item.status;
+                if (item.status === "Inactive") statusColor = "bg-red-100 text-red-800";
+                else if (item.status === "Maintenance") statusColor = "bg-yellow-100 text-yellow-800";
+                else if (item.status === "Damage") statusColor = "bg-rose-100 text-rose-900 font-bold";
+
+                let actionButtons = `<button class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1 rounded shadow cursor-pointer scan-qr-btn" data-id="${item.id}" data-name="${item.itemName}" data-code="${item.itemCode}">QR</button>`;
+
+                if (currentUser && currentUser.role !== "assistant_view") {
+                    actionButtons += `<button class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1 rounded shadow cursor-pointer edit-btn ml-1" data-id="${item.id}">Edit</button>`;
+                }
+                if (currentUser && currentUser.role === "admin") {
+                    actionButtons += `<button class="bg-red-600 hover:bg-red-700 text-white text-xs px-2.5 py-1 rounded shadow cursor-pointer delete-btn ml-1" data-id="${item.id}">Delete</button>`;
                 }
 
                 row.innerHTML = `
@@ -398,45 +596,77 @@
                     <td class="p-3 text-gray-500">${item.department} <br> <span class="text-xs text-gray-400">${item.location}</span></td>
                     <td class="p-3"><span class="px-2.5 py-1 text-xs rounded-full font-medium ${statusColor}">${statusText}</span></td>
                     <td class="p-3 text-gray-600 text-xs">${item.remarks}</td>
-                    <td class="p-3 text-center space-x-1 whitespace-nowrap">
-                        <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1 rounded shadow cursor-pointer scan-qr-btn" data-id="${item.id}" data-name="${item.itemName}" data-code="${item.itemCode}">
-                            ${translations[currentLang].btnAction}
-                        </button>
-                        <button class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1 rounded shadow cursor-pointer edit-btn" data-id="${item.id}">
-                            ${translations[currentLang].btnEdit}
-                        </button>
-                        <button class="bg-red-600 hover:bg-red-700 text-white text-xs px-2.5 py-1 rounded shadow cursor-pointer delete-btn" data-id="${item.id}">
-                            ${translations[currentLang].btnDel}
-                        </button>
-                    </td>
+                    <td class="p-3 text-center whitespace-nowrap">${actionButtons}</td>
                 `;
                 tableBody.appendChild(row);
             });
 
-            // Event Listeners for Row Actions
             document.querySelectorAll(".scan-qr-btn").forEach(btn => {
-                btn.addEventListener("click", (e) => {
-                    showQRCode(e.target.getAttribute("data-id"), e.target.getAttribute("data-name"), e.target.getAttribute("data-code"));
-                });
+                btn.addEventListener("click", (e) => showQRCode(e.target.getAttribute("data-id"), e.target.getAttribute("data-name"), e.target.getAttribute("data-code")));
             });
-
             document.querySelectorAll(".edit-btn").forEach(btn => {
-                btn.addEventListener("click", (e) => {
-                    loadItemForEdit(e.target.getAttribute("data-id"));
-                });
+                btn.addEventListener("click", (e) => loadItemForEdit(e.target.getAttribute("data-id")));
             });
-
             document.querySelectorAll(".delete-btn").forEach(btn => {
-                btn.addEventListener("click", (e) => {
-                    deleteItem(e.target.getAttribute("data-id"));
-                });
+                btn.addEventListener("click", (e) => deleteItem(e.target.getAttribute("data-id")));
             });
+        }
+
+        window.openApprovalModal = function() {
+            const list = document.getElementById("approvalList");
+            list.innerHTML = "";
+            if (pendingRequestsList.length === 0) {
+                list.innerHTML = `<p class="text-gray-500 text-center py-4">No pending requests.</p>`;
+            } else {
+                pendingRequestsList.forEach(req => {
+                    const div = document.createElement("div");
+                    div.className = "bg-gray-50 p-4 rounded-xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3";
+                    div.innerHTML = `
+                        <div>
+                            <p class="font-bold text-gray-800">Action: ${req.type} (${req.data.itemName})</p>
+                            <p class="text-xs text-gray-500">Requested by: <span class="font-semibold text-blue-600">${req.requestedBy}</span></p>
+                            <p class="text-xs text-gray-400">Code: ${req.data.itemCode} | Dept: ${req.data.department}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="approveRequest('${req.id}')" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded font-semibold cursor-pointer">Authorize</button>
+                            <button onclick="rejectRequest('${req.id}')" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded font-semibold cursor-pointer">Reject</button>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+            document.getElementById("approvalModal").classList.remove("hidden");
+        }
+
+        window.closeApprovalModal = function() {
+            document.getElementById("approvalModal").classList.add("hidden");
+        }
+
+        window.approveRequest = async function(reqId) {
+            const req = pendingRequestsList.find(r => r.id === reqId);
+            if (!req) return;
+            try {
+                if (req.type === "ADD") await addDoc(inventoryCollection, req.data);
+                else if (req.type === "UPDATE" && req.targetId) await updateDoc(doc(db, "items", req.targetId), req.data);
+                await deleteDoc(doc(db, "requests", reqId));
+                alert("Request authorized!");
+                openApprovalModal();
+            } catch (err) {
+                alert("Failed to approve.");
+            }
+        }
+
+        window.rejectRequest = async function(reqId) {
+            if (confirm("Reject request?")) {
+                await deleteDoc(doc(db, "requests", reqId));
+                alert("Request rejected.");
+                openApprovalModal();
+            }
         }
 
         async function loadItemForEdit(id) {
             const item = localItemsList.find(i => i.id === id);
             if (!item) return;
-
             document.getElementById("editingDocId").value = item.id;
             document.getElementById("srNo").value = item.srNo;
             document.getElementById("itemCode").value = item.itemCode;
@@ -448,8 +678,7 @@
             document.getElementById("location").value = item.location;
             document.getElementById("status").value = item.status;
             document.getElementById("remarks").value = item.remarks === '-' ? '' : item.remarks;
-
-            document.getElementById("btnSubmit").innerText = translations[currentLang].btnUpdate;
+            document.getElementById("btnSubmit").innerText = currentUser.role === "admin" ? "Update Item" : "Submit Update for Approval";
             document.getElementById("btnCancelEdit").classList.remove("hidden");
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -463,14 +692,10 @@
         }
 
         async function deleteItem(id) {
-            if (confirm("Are you sure you want to delete this item?")) {
-                try {
-                    await deleteDoc(doc(db, "items", id));
-                    alert("Item successfully deleted!");
-                } catch (err) {
-                    console.error("Delete error:", err);
-                    alert("Failed to delete item.");
-                }
+            if (currentUser.role !== "admin") return alert("Only Admin can delete!");
+            if (confirm("Delete this item?")) {
+                await deleteDoc(doc(db, "items", id));
+                alert("Item deleted!");
             }
         }
 
@@ -484,46 +709,30 @@
             qrcodeInstance.makeCode(scanTargetURL);
         }
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const viewItemId = urlParams.get('viewItem');
-            if (viewItemId) {
-                document.getElementById("mainDashboard").classList.add("hidden");
-                const scanCard = document.getElementById("scannedItemView");
-                const detailsBox = document.getElementById("scannedItemDetails");
-                scanCard.classList.remove("hidden");
-                detailsBox.innerHTML = `<p class="text-gray-500">Fetching item details from cloud...</p>`;
-                try {
-                    const docRef = doc(db, "items", viewItemId);
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        detailsBox.innerHTML = `
-                            <div class="bg-gray-50 p-4 rounded-xl border space-y-2">
-                                <p><strong>Sr. No:</strong> ${data.srNo}</p>
-                                <p><strong>Item Code:</strong> <span class="font-mono text-blue-700 font-bold">${data.itemCode}</span></p>
-                                <p><strong>Item Name:</strong> ${data.itemName}</p>
-                                <p><strong>Description:</strong> ${data.description || 'N/A'}</p>
-                                <p><strong>Purchase Date:</strong> ${data.purchaseDate || 'N/A'}</p>
-                                <p><strong>Warranty Date:</strong> ${data.warrantyDate || 'N/A'}</p>
-                                <p><strong>Department:</strong> ${data.department}</p>
-                                <p><strong>Location:</strong> ${data.location}</p>
-                                <p><strong>Status:</strong> <span class="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold text-xs">${data.status}</span></p>
-                                <p><strong>Remarks:</strong> ${data.remarks || 'N/A'}</p>
-                            </div>
-                        `;
-                    } else {
-                        detailsBox.innerHTML = `<p class="text-red-500 font-semibold">Item not found in database!</p>`;
-                    }
-                } catch (err) {
-                    detailsBox.innerHTML = `<p class="text-red-500">Error loading item details.</p>`;
-                }
-            }
-        });
+        window.exportToExcel = function() {
+            if (localItemsList.length === 0) return alert("No data!");
+            const exportData = localItemsList.map(item => ({
+                "Sr. No": item.srNo, "Item Code": item.itemCode, "Item Name": item.itemName,
+                "Description": item.description || "", "Purchase Date": item.purchaseDate || "",
+                "Warranty Date": item.warrantyDate || "", "Department": item.department,
+                "Location": item.location, "Status": item.status, "Remarks": item.remarks
+            }));
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Inventory");
+            XLSX.writeFile(workbook, "Ktayat_IT_Inventory.xlsx");
+        }
 
-        window.closeScannedView = function() {
-            window.location.href = window.location.href.split('?')[0];
-        };
+        window.exportToPDF = function() {
+            if (localItemsList.length === 0) return alert("No data!");
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(16);
+            doc.text("KTAYKIT IT INV - Inventory Report", 14, 15);
+            const tableData = localItemsList.map(item => [item.srNo, item.itemCode, item.itemName, item.department, item.location, item.status, item.purchaseDate || '-']);
+            doc.autoTable({ startY: 25, head: [['Sr. No', 'Code', 'Item Name', 'Department', 'Location', 'Status', 'Purchase']], body: tableData, theme: 'grid' });
+            doc.save("Ktayat_IT_Inventory.pdf");
+        }
     </script>
 </body>
 </html>
