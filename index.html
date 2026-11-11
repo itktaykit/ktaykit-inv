@@ -47,8 +47,9 @@
             <div class="bg-white p-6 rounded-xl shadow-md h-fit">
                 <h2 id="formTitle" class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Item Entry Form</h2>
                 <form id="inventoryForm" class="space-y-4">
+                    <input type="hidden" id="editingDocId" value="">
                     <div>
-                        <label id="lblSrNo" class="block text-sm font-semibold text-gray-700">Sr. No (Auto 4-Digit)</label>
+                        <label id="lblSrNo" class="block text-sm font-semibold text-gray-700">Sr. No (Auto)</label>
                         <input type="text" id="srNo" readonly class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg bg-gray-100 font-mono text-gray-600 cursor-not-allowed">
                     </div>
                     <div>
@@ -73,13 +74,29 @@
                             <input type="date" id="warrantyDate" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                         </div>
                     </div>
+                    <!-- Department Dropdown with Add More -->
                     <div>
                         <label id="lblDept" class="block text-sm font-semibold text-gray-700">Department</label>
-                        <input type="text" id="department" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <select id="department" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white mb-2">
+                            <option value="IT Support">IT Support</option>
+                            <option value="Kitchen">Kitchen</option>
+                            <option value="Cashier / POS">Cashier / POS</option>
+                            <option value="Management">Management</option>
+                            <option value="add_new">+ Add New Department</option>
+                        </select>
+                        <input type="text" id="newDepartmentInput" placeholder="Enter new department..." class="hidden w-full p-2.5 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
+                    <!-- Location Dropdown with Add More -->
                     <div>
                         <label id="lblLoc" class="block text-sm font-semibold text-gray-700">Location</label>
-                        <input type="text" id="location" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <select id="location" class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white mb-2">
+                            <option value="Branch Main Hall">Branch Main Hall</option>
+                            <option value="Server Room">Server Room</option>
+                            <option value="Kitchen Counter">Kitchen Counter</option>
+                            <option value="Store Room">Store Room</option>
+                            <option value="add_new">+ Add New Location</option>
+                        </select>
+                        <input type="text" id="newLocationInput" placeholder="Enter new location..." class="hidden w-full p-2.5 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
                         <label id="lblStatus" class="block text-sm font-semibold text-gray-700">Status</label>
@@ -87,13 +104,17 @@
                             <option value="Active" id="optActive">Active</option>
                             <option value="Inactive" id="optInactive">Inactive</option>
                             <option value="Maintenance" id="optMaint">Maintenance</option>
+                            <option value="Damage" id="optDamage">Damage</option>
                         </select>
                     </div>
                     <div>
                         <label id="lblRemarks" class="block text-sm font-semibold text-gray-700">Remarks</label>
                         <input type="text" id="remarks" placeholder="Optional notes..." class="w-full mt-1 p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
-                    <button type="submit" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow transition cursor-pointer">Save & Generate QR</button>
+                    <div class="flex gap-2">
+                        <button type="submit" id="btnSubmit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow transition cursor-pointer">Save & Generate QR</button>
+                        <button type="button" id="btnCancelEdit" onclick="cancelEditMode()" class="hidden bg-gray-500 hover:bg-gray-600 text-white font-semibold px-4 py-2.5 rounded-lg shadow transition cursor-pointer">Cancel</button>
+                    </div>
                 </form>
             </div>
 
@@ -121,7 +142,7 @@
                                 <th id="thDept" class="p-3 text-start">Dept / Loc</th>
                                 <th id="thStatus" class="p-3 text-start">Status</th>
                                 <th id="thRemarks" class="p-3 text-start">Remarks</th>
-                                <th id="thAction" class="p-3 text-center">QR Code</th>
+                                <th id="thAction" class="p-3 text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="inventoryTableBody">
@@ -138,7 +159,7 @@
     <!-- Firebase SDK (Version 10 Stable) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // --- আপনার Firebase Config এখানে বসান ---
         const firebaseConfig = {
@@ -160,25 +181,25 @@
         const translations = {
             en: {
                 dir: "ltr", switcher: "العربية", subtitle: "Property of Ktaykit Fast Food",
-                formTitle: "Item Entry Form", lblSrNo: "Sr. No (Auto 4-Digit)", lblItemCode: "Item Code (Auto)",
+                formTitle: "Item Entry Form", lblSrNo: "Sr. No (Auto)", lblItemCode: "Item Code (Auto)",
                 lblItemName: "Item Name", lblDesc: "Description", lblPurchaseDate: "Purchase Date",
                 lblWarranty: "Warranty Date", lblDept: "Department", lblLoc: "Location", lblStatus: "Status",
-                lblRemarks: "Remarks", optActive: "Active", optInactive: "Inactive", optMaint: "Maintenance",
-                btnSubmit: "Save & Generate QR", tableTitle: "Stored Inventory Items", thSr: "Sr. No",
+                lblRemarks: "Remarks", optActive: "Active", optInactive: "Inactive", optMaint: "Maintenance", optDamage: "Damage",
+                btnSubmit: "Save & Generate QR", btnUpdate: "Update Item", tableTitle: "Stored Inventory Items", thSr: "Sr. No",
                 thCode: "Code", thName: "Item Name", thDates: "Purchase / Warranty", thDept: "Dept / Loc",
-                thStatus: "Status", thRemarks: "Remarks", thAction: "QR Code", btnAction: "Show QR",
-                qrTitle: "QR Code", btnPrint: "Print QR Label", alertSuccess: "Data Successfully Saved!", scanTitle: "Scanned Item Details"
+                thStatus: "Status", thRemarks: "Remarks", thAction: "Actions", btnAction: "QR", btnEdit: "Edit", btnDel: "Delete",
+                qrTitle: "QR Code", btnPrint: "Print QR Label", alertSuccess: "Data Successfully Saved!", alertUpdate: "Data Successfully Updated!", scanTitle: "Scanned Item Details"
             },
             ar: {
                 dir: "rtl", switcher: "English", subtitle: "ملك لـ كتيكت للوجبات السريعة",
-                formTitle: "نموذج إدخال المواد", lblSrNo: "الرقم التسلسلي (تلقائي 4 أرقام)", lblItemCode: "رمز المادة (تلقائي)",
+                formTitle: "نموذج إدخال المواد", lblSrNo: "الرقم التسلسلي (تلقائي)", lblItemCode: "رمز المادة (تلقائي)",
                 lblItemName: "اسم المادة", lblDesc: "الوصف", lblPurchaseDate: "تاريخ الشراء",
                 lblWarranty: "تاريخ الضمان", lblDept: "القسم", lblLoc: "الموقع", lblStatus: "الحالة",
-                lblRemarks: "الملاحظات", optActive: "نشط", optInactive: "غير نشط", optMaint: "صيانة",
-                btnSubmit: "حفظ وإنشاء رمز QR", tableTitle: "المواد المخزنة في المستودع", thSr: "الرقم",
+                lblRemarks: "الملاحظات", optActive: "نشط", optInactive: "غير نشط", optMaint: "صيانة", optDamage: "تالف",
+                btnSubmit: "حفظ وإنشاء رمز QR", btnUpdate: "تحديث المادة", tableTitle: "المواد المخزنة في المستودع", thSr: "الرقم",
                 thCode: "الرمز", thName: "اسم المادة", thDates: "الشراء / الضمان", thDept: "القسم / الموقع",
-                thStatus: "الحالة", thRemarks: "الملاحظات", thAction: "رمز QR", btnAction: "عرض QR",
-                qrTitle: "رمز QR", printBtn: "طباعة ملصق QR", alertSuccess: "تم حفظ البيانات بنجاح!", scanTitle: "تفاصيل المادة الممسوحة"
+                thStatus: "الحالة", thRemarks: "الملاحظات", thAction: "الإجراءات", btnAction: "QR", btnEdit: "تعديل", btnDel: "حذف",
+                qrTitle: "رمز QR", printBtn: "طباعة ملصق QR", alertSuccess: "تم حفظ البيانات بنجاح!", alertUpdate: "تم تحديث البيانات بنجاح!", scanTitle: "تفاصيل المادة الممسوحة"
             }
         };
 
@@ -210,7 +231,11 @@
             document.getElementById("optActive").innerText = data.optActive;
             document.getElementById("optInactive").innerText = data.optInactive;
             document.getElementById("optMaint").innerText = data.optMaint;
-            document.getElementById("btnSubmit").innerText = data.btnSubmit;
+            document.getElementById("optDamage").innerText = data.optDamage;
+            
+            const isEditing = document.getElementById("editingDocId").value !== "";
+            document.getElementById("btnSubmit").innerText = isEditing ? data.btnUpdate : data.btnSubmit;
+            
             document.getElementById("tableTitle").innerText = data.tableTitle;
             document.getElementById("thSr").innerText = data.thSr;
             document.getElementById("thCode").innerText = data.thCode;
@@ -225,22 +250,75 @@
             renderTable();
         }
 
-        // Auto-generate Sr. No & Item Code when data updates
+        // Handle Dynamic "Add New" Dropdowns
+        document.getElementById("department").addEventListener("change", (e) => {
+            const input = document.getElementById("newDepartmentInput");
+            if (e.target.value === "add_new") {
+                input.classList.remove("hidden");
+                input.required = true;
+                input.focus();
+            } else {
+                input.classList.add("hidden");
+                input.required = false;
+                input.value = "";
+            }
+        });
+
+        document.getElementById("location").addEventListener("change", (e) => {
+            const input = document.getElementById("newLocationInput");
+            if (e.target.value === "add_new") {
+                input.classList.remove("hidden");
+                input.required = true;
+                input.focus();
+            } else {
+                input.classList.add("hidden");
+                input.required = false;
+                input.value = "";
+            }
+        });
+
         function generateAutoValues() {
+            if (document.getElementById("editingDocId").value !== "") return; // Don't change code during edit
             let nextNum = 1;
             if (localItemsList.length > 0) {
                 const maxSr = Math.max(...localItemsList.map(item => parseInt(item.srNo) || 0));
                 nextNum = maxSr + 1;
             }
-            const formattedSr = String(nextNum).padStart(4, '0');
-            const randomCode = 'KT-' + Math.floor(1000 + Math.random() * 9000);
-            
-            document.getElementById("srNo").value = formattedSr;
-            document.getElementById("itemCode").value = randomCode;
+            document.getElementById("srNo").value = String(nextNum).padStart(4, '0');
+            document.getElementById("itemCode").value = 'KT-' + Math.floor(1000 + Math.random() * 9000);
         }
 
         document.getElementById("inventoryForm").addEventListener("submit", async (e) => {
             e.preventDefault();
+            const editId = document.getElementById("editingDocId").value;
+            
+            // Get Department Value
+            let dept = document.getElementById("department").value;
+            if (dept === "add_new") {
+                dept = document.getElementById("newDepartmentInput").value.trim();
+                // Add to dropdown dynamically
+                const select = document.getElementById("department");
+                const opt = document.createElement("option");
+                opt.value = dept;
+                opt.innerText = dept;
+                select.insertBefore(opt, select.lastElementChild);
+                select.value = dept;
+                document.getElementById("newDepartmentInput").classList.add("hidden");
+            }
+
+            // Get Location Value
+            let loc = document.getElementById("location").value;
+            if (loc === "add_new") {
+                loc = document.getElementById("newLocationInput").value.trim();
+                const select = document.getElementById("location");
+                const opt = document.createElement("option");
+                opt.value = loc;
+                opt.innerText = loc;
+                select.insertBefore(opt, select.lastElementChild);
+                select.value = loc;
+                document.getElementById("newLocationInput").classList.add("hidden");
+            }
+
             const itemData = {
                 srNo: document.getElementById("srNo").value,
                 itemCode: document.getElementById("itemCode").value,
@@ -248,18 +326,28 @@
                 description: document.getElementById("description").value,
                 purchaseDate: document.getElementById("purchaseDate").value,
                 warrantyDate: document.getElementById("warrantyDate").value,
-                department: document.getElementById("department").value,
-                location: document.getElementById("location").value,
+                department: dept,
+                location: loc,
                 status: document.getElementById("status").value,
                 remarks: document.getElementById("remarks").value || '-',
                 timestamp: new Date()
             };
+
             try {
-                const docRef = await addDoc(inventoryCollection, itemData);
+                if (editId) {
+                    // Update existing item
+                    const docRef = doc(db, "items", editId);
+                    await updateDoc(docRef, itemData);
+                    alert(translations[currentLang].alertUpdate);
+                    cancelEditMode();
+                } else {
+                    // Add new item
+                    const docRef = await addDoc(inventoryCollection, itemData);
+                    showQRCode(docRef.id, itemData.itemName, itemData.itemCode);
+                    alert(translations[currentLang].alertSuccess);
+                }
                 document.getElementById("inventoryForm").reset();
-                generateAutoValues(); // Refresh auto values for next entry
-                showQRCode(docRef.id, itemData.itemName, itemData.itemCode);
-                alert(translations[currentLang].alertSuccess);
+                generateAutoValues();
             } catch (error) {
                 console.error("Error: ", error);
                 alert("Database Error! Check your Firebase Rules & Config.");
@@ -270,7 +358,9 @@
             localItemsList = [];
             snapshot.forEach(doc => localItemsList.push({ id: doc.id, ...doc.data() }));
             localItemsList.sort((a, b) => parseInt(a.srNo) - parseInt(b.srNo));
-            generateAutoValues();
+            if (!document.getElementById("editingDocId").value) {
+                generateAutoValues();
+            }
             renderTable();
         }, (error) => {
             console.error("Firestore Error:", error);
@@ -295,7 +385,11 @@
                 } else if (item.status === "Maintenance") {
                     statusColor = "bg-yellow-100 text-yellow-800";
                     statusText = translations[currentLang].optMaint;
+                } else if (item.status === "Damage") {
+                    statusColor = "bg-rose-100 text-rose-900 font-bold";
+                    statusText = translations[currentLang].optDamage;
                 }
+
                 row.innerHTML = `
                     <td class="p-3 font-mono font-medium text-gray-700">${item.srNo}</td>
                     <td class="p-3 font-mono text-blue-600 font-semibold">${item.itemCode}</td>
@@ -304,24 +398,80 @@
                     <td class="p-3 text-gray-500">${item.department} <br> <span class="text-xs text-gray-400">${item.location}</span></td>
                     <td class="p-3"><span class="px-2.5 py-1 text-xs rounded-full font-medium ${statusColor}">${statusText}</span></td>
                     <td class="p-3 text-gray-600 text-xs">${item.remarks}</td>
-                    <td class="p-3 text-center">
-                        <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg shadow cursor-pointer scan-qr-btn" data-id="${item.id}" data-name="${item.itemName}" data-code="${item.itemCode}">
+                    <td class="p-3 text-center space-x-1 whitespace-nowrap">
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1 rounded shadow cursor-pointer scan-qr-btn" data-id="${item.id}" data-name="${item.itemName}" data-code="${item.itemCode}">
                             ${translations[currentLang].btnAction}
+                        </button>
+                        <button class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1 rounded shadow cursor-pointer edit-btn" data-id="${item.id}">
+                            ${translations[currentLang].btnEdit}
+                        </button>
+                        <button class="bg-red-600 hover:bg-red-700 text-white text-xs px-2.5 py-1 rounded shadow cursor-pointer delete-btn" data-id="${item.id}">
+                            ${translations[currentLang].btnDel}
                         </button>
                     </td>
                 `;
                 tableBody.appendChild(row);
             });
 
-            document.querySelectorAll(".scan-qr-btn").forEach(button => {
-                button.addEventListener("click", (e) => {
-                    showQRCode(
-                        e.target.getAttribute("data-id"),
-                        e.target.getAttribute("data-name"),
-                        e.target.getAttribute("data-code")
-                    );
+            // Event Listeners for Row Actions
+            document.querySelectorAll(".scan-qr-btn").forEach(btn => {
+                btn.addEventListener("click", (e) => {
+                    showQRCode(e.target.getAttribute("data-id"), e.target.getAttribute("data-name"), e.target.getAttribute("data-code"));
                 });
             });
+
+            document.querySelectorAll(".edit-btn").forEach(btn => {
+                btn.addEventListener("click", (e) => {
+                    loadItemForEdit(e.target.getAttribute("data-id"));
+                });
+            });
+
+            document.querySelectorAll(".delete-btn").forEach(btn => {
+                btn.addEventListener("click", (e) => {
+                    deleteItem(e.target.getAttribute("data-id"));
+                });
+            });
+        }
+
+        async function loadItemForEdit(id) {
+            const item = localItemsList.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById("editingDocId").value = item.id;
+            document.getElementById("srNo").value = item.srNo;
+            document.getElementById("itemCode").value = item.itemCode;
+            document.getElementById("itemName").value = item.itemName;
+            document.getElementById("description").value = item.description || "";
+            document.getElementById("purchaseDate").value = item.purchaseDate || "";
+            document.getElementById("warrantyDate").value = item.warrantyDate || "";
+            document.getElementById("department").value = item.department;
+            document.getElementById("location").value = item.location;
+            document.getElementById("status").value = item.status;
+            document.getElementById("remarks").value = item.remarks === '-' ? '' : item.remarks;
+
+            document.getElementById("btnSubmit").innerText = translations[currentLang].btnUpdate;
+            document.getElementById("btnCancelEdit").classList.remove("hidden");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.cancelEditMode = function() {
+            document.getElementById("editingDocId").value = "";
+            document.getElementById("inventoryForm").reset();
+            document.getElementById("btnSubmit").innerText = translations[currentLang].btnSubmit;
+            document.getElementById("btnCancelEdit").classList.add("hidden");
+            generateAutoValues();
+        }
+
+        async function deleteItem(id) {
+            if (confirm("Are you sure you want to delete this item?")) {
+                try {
+                    await deleteDoc(doc(db, "items", id));
+                    alert("Item successfully deleted!");
+                } catch (err) {
+                    console.error("Delete error:", err);
+                    alert("Failed to delete item.");
+                }
+            }
         }
 
         function showQRCode(id, name, code) {
