@@ -17,9 +17,9 @@
     <style>
         @media print {
             body * { visibility: hidden; }
-            #qrPanel, #qrPanel * { visibility: visible; }
-            #qrPanel { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
-            #btnPrint { display: none; }
+            #qrPanel, #qrPanel *, #reportModalContent, #reportModalContent * { visibility: visible; }
+            #qrPanel, #reportModalContent { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; background: white; }
+            .no-print { display: none !important; }
         }
     </style>
 </head>
@@ -53,75 +53,101 @@
     <!-- MAIN APP CONTAINER -->
     <div id="appContainer" class="max-w-7xl mx-auto hidden space-y-6">
         <!-- Header -->
-        <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-5 rounded-2xl shadow-lg flex justify-between items-center">
+        <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-5 rounded-2xl shadow-lg flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide">KTAYKIT IT INV</h1>
+                <h1 id="headerTitle" class="text-2xl md:text-3xl font-extrabold tracking-wide">KTAYKIT IT INV</h1>
                 <p id="headerSubtitle" class="text-xs md:text-sm text-blue-200 font-medium mt-1">Property of Ktaykit Fast Food</p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <span id="loggedInUserBadge" class="bg-blue-900/80 text-xs px-3.5 py-2 rounded-xl font-semibold border border-blue-400 backdrop-blur-sm"></span>
                 <button id="langSwitcher" class="bg-indigo-900 hover:bg-indigo-950 text-white font-semibold py-2 px-4 rounded-xl text-sm transition cursor-pointer shadow">
                     العربية
                 </button>
-                <button onclick="logout()" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 px-4 rounded-xl text-sm transition cursor-pointer shadow">
+                <button onclick="logout()" id="btnLogout" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 px-4 rounded-xl text-sm transition cursor-pointer shadow">
                     Logout
                 </button>
             </div>
         </header>
 
-        <!-- Admin Control Bar -->
-        <div id="adminControlBar" class="hidden bg-white p-4 rounded-2xl shadow-md border flex flex-col md:flex-row justify-between items-center gap-3">
-            <div class="flex items-center gap-2">
-                <span class="text-amber-600 font-bold">⚠️ Pending Authorizations:</span>
+        <!-- Admin & Action Control Bar -->
+        <div class="bg-white p-4 rounded-2xl shadow-md border flex flex-col md:flex-row justify-between items-center gap-3">
+            <div id="adminControlBar" class="hidden flex items-center gap-2">
+                <span id="lblPendingAuth" class="text-amber-600 font-bold">⚠️ Pending Authorizations:</span>
                 <span id="pendingCount" class="bg-amber-100 text-amber-800 px-3 py-0.5 rounded-full text-xs font-bold">0</span>
-                <button onclick="openApprovalModal()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow cursor-pointer ml-2">Review Requests</button>
+                <button onclick="openApprovalModal()" id="btnReviewReq" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow cursor-pointer ml-2">Review Requests</button>
             </div>
+            
+            <!-- Add New Item Button (Popup Trigger) -->
+            <div>
+                <button onclick="openItemEntryModal()" id="btnAddItemPopup" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow cursor-pointer flex items-center gap-2">
+                    ➕ Add New Item
+                </button>
+            </div>
+
             <div class="flex flex-wrap gap-2">
-                <button onclick="openAddUserModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow cursor-pointer">➕ Add User</button>
-                <button onclick="openChangePasswordModal()" class="bg-gray-700 hover:bg-gray-800 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow cursor-pointer">🔑 Change Password</button>
+                <button onclick="openAddUserModal()" id="btnAddUser" class="hidden bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow cursor-pointer">➕ Add User</button>
+                <button onclick="openChangePasswordModal()" id="btnChangePass" class="hidden bg-gray-700 hover:bg-gray-800 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow cursor-pointer">🔑 Change Password</button>
             </div>
         </div>
 
         <!-- Dashboard Metrics -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-5 rounded-2xl shadow-lg flex items-center justify-between">
+            <div onclick="filterMainTable('ALL', 'ALL')" class="cursor-pointer hover:scale-[1.02] transition bg-gradient-to-br from-blue-500 to-blue-700 text-white p-5 rounded-2xl shadow-lg flex items-center justify-between">
                 <div>
-                    <p class="text-xs uppercase font-bold tracking-wider text-blue-100">Total Items</p>
+                    <p id="lblDashTotal" class="text-xs uppercase font-bold tracking-wider text-blue-100">Total Items (Show All)</p>
                     <h3 id="dashTotalItems" class="text-3xl font-extrabold mt-1">0</h3>
                 </div>
                 <div class="bg-blue-400/30 p-3 rounded-xl text-2xl">📦</div>
             </div>
             <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white p-5 rounded-2xl shadow-lg flex items-center justify-between">
                 <div>
-                    <p class="text-xs uppercase font-bold tracking-wider text-emerald-100">Active Items</p>
+                    <p id="lblDashActive" class="text-xs uppercase font-bold tracking-wider text-emerald-100">Active Items</p>
                     <h3 id="dashActiveItems" class="text-3xl font-extrabold mt-1">0</h3>
                 </div>
                 <div class="bg-emerald-400/30 p-3 rounded-xl text-2xl">🟢</div>
             </div>
             <div class="bg-gradient-to-br from-amber-500 to-amber-700 text-white p-5 rounded-2xl shadow-lg flex items-center justify-between">
                 <div>
-                    <p class="text-xs uppercase font-bold tracking-wider text-amber-100">Maintenance</p>
+                    <p id="lblDashMaint" class="text-xs uppercase font-bold tracking-wider text-amber-100">Maintenance</p>
                     <h3 id="dashMaintItems" class="text-3xl font-extrabold mt-1">0</h3>
                 </div>
                 <div class="bg-amber-400/30 p-3 rounded-xl text-2xl">🛠️</div>
             </div>
             <div class="bg-gradient-to-br from-rose-500 to-rose-700 text-white p-5 rounded-2xl shadow-lg flex items-center justify-between">
                 <div>
-                    <p class="text-xs uppercase font-bold tracking-wider text-rose-100">Damaged / Inactive</p>
+                    <p id="lblDashDamage" class="text-xs uppercase font-bold tracking-wider text-rose-100">Damaged / Inactive</p>
                     <h3 id="dashDamageItems" class="text-3xl font-extrabold mt-1">0</h3>
                 </div>
                 <div class="bg-rose-400/30 p-3 rounded-xl text-2xl">⚠️</div>
             </div>
         </div>
 
-        <!-- Branch & Department Summary Widget -->
+        <!-- Branch & Department Interactive Report Widgets -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-100">
-                <h3 class="font-bold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">🏢 Department Wise Report</h3>
+                <div class="flex justify-between items-center mb-3 border-b pb-2">
+                    <h3 id="lblDeptReportTitle" class="font-bold text-gray-800 flex items-center gap-2">🏢 Department Wise Report</h3>
+                    <button onclick="openFilterReportModal('department', 'ALL')" id="btnSelectDeptRep" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer shadow">
+                        Select & View Report
+                    </button>
+                </div>
+                <p id="lblDeptReportSub" class="text-xs text-gray-400 mb-2">Click any department below or use the button above to inspect items:</p>
                 <div id="deptSummaryList" class="space-y-2 max-h-48 overflow-y-auto text-sm"></div>
             </div>
+
             <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-100">
-                <h3 class="font-bold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">📍 Location / Branch Report</h3>
+                <div class="flex justify-between items-center mb-3 border-b pb-2">
+                    <h3 id="lblLocReportTitle" class="font-bold text-gray-800 flex items-center gap-2">📍 Location / Branch Report</h3>
+                    <div class="flex gap-1.5">
+                        <button onclick="openFilterReportModal('branch_all', 'ALL')" id="btnBranchAll" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer shadow">
+                            Branch Wise (All)
+                        </button>
+                        <button onclick="openFilterReportModal('location', 'ALL')" id="btnChooseLoc" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg cursor-pointer shadow">
+                            Choose Location
+                        </button>
+                    </div>
+                </div>
+                <p id="lblLocReportSub" class="text-xs text-gray-400 mb-2">Click "Branch Wise (All)" for full list or choose a specific location:</p>
                 <div id="locSummaryList" class="space-y-2 max-h-48 overflow-y-auto text-sm"></div>
             </div>
         </div>
@@ -130,64 +156,131 @@
         <div id="scannedItemView" class="hidden bg-white p-6 md:p-8 rounded-2xl shadow-xl border-t-4 border-blue-600 max-w-2xl mx-auto">
             <div class="flex justify-between items-center border-b pb-4 mb-4">
                 <h2 id="scanViewTitle" class="text-xl font-bold text-gray-800">Scanned Item Information</h2>
-                <button onclick="closeScannedView()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3.5 py-1.5 rounded-xl text-sm font-medium cursor-pointer">Back to Home</button>
+                <button onclick="closeScannedView()" id="btnBackHome" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3.5 py-1.5 rounded-xl text-sm font-medium cursor-pointer">Back to Home</button>
             </div>
             <div id="scannedItemDetails" class="space-y-3 text-gray-700"></div>
         </div>
 
-        <!-- Main Content Grid -->
-        <div id="mainDashboard" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Data Entry Form -->
-            <div class="bg-white p-6 rounded-2xl shadow-md h-fit border border-gray-100">
-                <h2 id="formTitle" class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Item Entry Form</h2>
-                <form id="inventoryForm" class="space-y-4">
-                    <input type="hidden" id="editingDocId" value="">
+        <!-- Main Content Area: QR Panel & Full Data Table spanning the page -->
+        <div class="space-y-6">
+            <div id="qrPanel" class="bg-white p-6 rounded-2xl shadow-md hidden flex flex-col items-center justify-center text-center border border-gray-100 max-w-xl mx-auto">
+                <p class="text-xs font-extrabold text-blue-600 uppercase tracking-wider mb-1">Property of Ktaykit Fast Food</p>
+                <h3 class="text-lg font-bold text-gray-800 mb-3" id="qrTitle">Generated QR Code</h3>
+                <div id="qrcode" class="p-3 bg-white border-2 border-gray-200 rounded-xl mb-3 inline-block shadow-inner"></div>
+                <p class="text-xs text-gray-500 mb-4 max-w-md break-all" id="qrLinkText"></p>
+                <button id="btnPrint" onclick="window.print()" class="no-print bg-gray-800 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-gray-900 cursor-pointer shadow">Print QR Label</button>
+            </div>
+
+            <!-- Full Width Inventory Table -->
+            <div class="bg-white p-6 rounded-2xl shadow-md overflow-x-auto border border-gray-100">
+                <div class="flex flex-col sm:flex-row justify-between items-center border-b pb-4 mb-4 gap-3">
                     <div>
-                        <label id="lblSrNo" class="block text-sm font-semibold text-gray-700">Sr. No (Auto)</label>
-                        <input type="text" id="srNo" readonly class="w-full mt-1 p-3 border border-gray-300 rounded-xl bg-gray-50 font-mono text-gray-600 cursor-not-allowed">
+                        <h2 id="tableTitle" class="text-xl font-bold text-gray-800">Stored Inventory Items</h2>
+                        <span id="activeFilterBadge" class="hidden text-xs bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full font-semibold mt-1 inline-block"></span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="exportToExcel()" id="btnExcel" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow cursor-pointer flex items-center gap-1.5">📊 Export Excel</button>
+                        <button onclick="exportToPDF()" id="btnPDF" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow cursor-pointer flex items-center gap-1.5">📄 Export PDF</button>
+                    </div>
+                </div>
+                <table class="w-full text-start border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-700 border-b border-gray-200">
+                            <th id="thSr" class="p-3 text-start">Sr. No</th>
+                            <th id="thCode" class="p-3 text-start">Code</th>
+                            <th id="thName" class="p-3 text-start">Item Name</th>
+                            <th id="thIP" class="p-3 text-start">IP / MAC</th>
+                            <th id="thDates" class="p-3 text-start">Purchase / Warranty</th>
+                            <th id="thDept" class="p-3 text-start">Dept / Loc</th>
+                            <th id="thStatus" class="p-3 text-start">Status</th>
+                            <th id="thRemarks" class="p-3 text-start">Remarks</th>
+                            <th id="thAction" class="p-3 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody">
+                        <tr><td colspan="9" class="p-4 text-center text-gray-400">Loading data from database...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ITEM ENTRY MODAL (POPUP FORM) WITH IP & MAC -->
+    <div id="itemEntryModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white max-w-lg w-full p-6 md:p-8 rounded-2xl shadow-2xl space-y-4 my-8 relative">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h2 id="formTitle" class="text-xl font-bold text-gray-800">Item Entry Form</h2>
+                <button onclick="closeItemEntryModal()" class="text-gray-500 hover:text-gray-800 font-bold text-xl cursor-pointer">&times;</button>
+            </div>
+            
+            <form id="inventoryForm" class="space-y-3.5">
+                <input type="hidden" id="editingDocId" value="">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label id="lblSrNo" class="block text-xs font-semibold text-gray-700">Sr. No (Auto)</label>
+                        <input type="text" id="srNo" readonly class="w-full mt-1 p-2.5 border border-gray-300 rounded-xl bg-gray-50 font-mono text-gray-600 text-sm cursor-not-allowed">
                     </div>
                     <div>
-                        <label id="lblItemCode" class="block text-sm font-semibold text-gray-700">Item Code (Auto)</label>
-                        <input type="text" id="itemCode" readonly class="w-full mt-1 p-3 border border-gray-300 rounded-xl bg-gray-50 font-mono text-gray-600 cursor-not-allowed">
+                        <label id="lblItemCode" class="block text-xs font-semibold text-gray-700">Item Code (Auto)</label>
+                        <input type="text" id="itemCode" readonly class="w-full mt-1 p-2.5 border border-gray-300 rounded-xl bg-gray-50 font-mono text-gray-600 text-sm cursor-not-allowed">
+                    </div>
+                </div>
+
+                <div>
+                    <label id="lblItemName" class="block text-xs font-semibold text-gray-700">Item Name</label>
+                    <input type="text" id="itemName" required placeholder="e.g. Dell Laptop" class="w-full mt-1 p-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+                </div>
+
+                <!-- IP Address and MAC Address fields -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label id="lblIpAddress" class="block text-xs font-semibold text-gray-700">IP Address</label>
+                        <input type="text" id="ipAddress" placeholder="e.g. 192.168.1.50" class="w-full mt-1 p-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm">
                     </div>
                     <div>
-                        <label id="lblItemName" class="block text-sm font-semibold text-gray-700">Item Name</label>
-                        <input type="text" id="itemName" required placeholder="e.g. Dell Laptop" class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label id="lblMacAddress" class="block text-xs font-semibold text-gray-700">MAC Address</label>
+                        <input type="text" id="macAddress" placeholder="e.g. AA:BB:CC:DD:EE:FF" class="w-full mt-1 p-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label id="lblDesc" class="block text-xs font-semibold text-gray-700">Description</label>
+                    <textarea id="description" rows="2" class="w-full mt-1 p-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label id="lblPurchaseDate" class="block text-xs font-semibold text-gray-700">Purchase Date</label>
+                        <input type="date" id="purchaseDate" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm">
                     </div>
                     <div>
-                        <label id="lblDesc" class="block text-sm font-semibold text-gray-700">Description</label>
-                        <textarea id="description" rows="2" class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                        <label id="lblWarranty" class="block text-xs font-semibold text-gray-700">Warranty Date</label>
+                        <input type="date" id="warrantyDate" required class="w-full mt-1 p-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm">
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label id="lblPurchaseDate" class="block text-sm font-semibold text-gray-700">Purchase Date</label>
-                            <input type="date" id="purchaseDate" required class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                        </div>
-                        <div>
-                            <label id="lblWarranty" class="block text-sm font-semibold text-gray-700">Warranty Date</label>
-                            <input type="date" id="warrantyDate" required class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                        </div>
-                    </div>
-                    
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <div class="flex justify-between items-center">
-                            <label id="lblDept" class="block text-sm font-semibold text-gray-700">Department</label>
-                            <button type="button" onclick="openAddDepartmentModal()" class="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer">+ Add New</button>
+                            <label id="lblDept" class="block text-xs font-semibold text-gray-700">Department</label>
+                            <button type="button" onclick="openAddDepartmentModal()" class="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer">+ Add</button>
                         </div>
-                        <select id="department" class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white"></select>
+                        <select id="department" class="w-full mt-1 p-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"></select>
                     </div>
 
                     <div>
                         <div class="flex justify-between items-center">
-                            <label id="lblLoc" class="block text-sm font-semibold text-gray-700">Location / Branch</label>
-                            <button type="button" onclick="openAddLocationModal()" class="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer">+ Add New</button>
+                            <label id="lblLoc" class="block text-xs font-semibold text-gray-700">Location / Branch</label>
+                            <button type="button" onclick="openAddLocationModal()" class="text-xs text-blue-600 hover:text-blue-800 font-bold cursor-pointer">+ Add</button>
                         </div>
-                        <select id="location" class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white"></select>
+                        <select id="location" class="w-full mt-1 p-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"></select>
                     </div>
+                </div>
 
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label id="lblStatus" class="block text-sm font-semibold text-gray-700">Status</label>
-                        <select id="status" class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        <label id="lblStatus" class="block text-xs font-semibold text-gray-700">Status</label>
+                        <select id="status" class="w-full mt-1 p-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm">
                             <option value="Active" id="optActive">Active</option>
                             <option value="Inactive" id="optInactive">Inactive</option>
                             <option value="Maintenance" id="optMaint">Maintenance</option>
@@ -195,52 +288,56 @@
                         </select>
                     </div>
                     <div>
-                        <label id="lblRemarks" class="block text-sm font-semibold text-gray-700">Remarks</label>
-                        <input type="text" id="remarks" placeholder="Optional notes..." class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label id="lblRemarks" class="block text-xs font-semibold text-gray-700">Remarks</label>
+                        <input type="text" id="remarks" placeholder="Optional notes..." class="w-full mt-1 p-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                     </div>
-                    <div class="flex gap-2">
-                        <button type="submit" id="btnSubmit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow transition cursor-pointer">Add Item & QR</button>
-                        <button type="button" id="btnCancelEdit" onclick="cancelEditMode()" class="hidden bg-gray-500 hover:bg-gray-600 text-white font-semibold px-4 py-3 rounded-xl shadow transition cursor-pointer">Cancel</button>
-                    </div>
-                </form>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" id="btnSubmit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow transition cursor-pointer text-sm">Add Item & QR</button>
+                    <button type="button" id="btnCancelEdit" onclick="cancelEditMode()" class="hidden bg-gray-500 hover:bg-gray-600 text-white font-semibold px-4 py-3 rounded-xl shadow transition cursor-pointer text-sm">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- INTERACTIVE REPORT MODAL -->
+    <div id="filterReportModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
+        <div id="reportModalContent" class="bg-white max-w-5xl w-full p-6 rounded-2xl shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div>
+                    <h3 id="reportModalTitle" class="text-xl font-bold text-gray-800">Inventory Report</h3>
+                    <p class="text-xs text-gray-500">Property of Ktaykit Fast Food</p>
+                </div>
+                <div class="flex items-center gap-2 no-print">
+                    <button onclick="window.print()" id="btnPrintRep" class="bg-gray-800 hover:bg-gray-900 text-white text-xs font-semibold px-3.5 py-2 rounded-xl cursor-pointer">🖨️ Print Report</button>
+                    <button onclick="closeFilterReportModal()" id="btnCloseRep" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-3 py-1.5 rounded-xl text-sm cursor-pointer">&times; Close</button>
+                </div>
             </div>
 
-            <!-- Right Side: QR Display & Data Table -->
-            <div class="lg:col-span-2 space-y-6">
-                <div id="qrPanel" class="bg-white p-6 rounded-2xl shadow-md hidden flex flex-col items-center justify-center text-center border border-gray-100">
-                    <p class="text-xs font-extrabold text-blue-600 uppercase tracking-wider mb-1">Property of Ktaykit Fast Food</p>
-                    <h3 class="text-lg font-bold text-gray-800 mb-3" id="qrTitle">Generated QR Code</h3>
-                    <div id="qrcode" class="p-3 bg-white border-2 border-gray-200 rounded-xl mb-3 inline-block shadow-inner"></div>
-                    <p class="text-xs text-gray-500 mb-4 max-w-md break-all" id="qrLinkText"></p>
-                    <button id="btnPrint" onclick="window.print()" class="bg-gray-800 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-gray-900 cursor-pointer shadow">Print QR Label</button>
-                </div>
+            <div id="reportSelectorBar" class="bg-gray-50 p-3.5 rounded-xl border flex flex-col sm:flex-row items-center gap-3 no-print">
+                <label id="reportSelectorLabel" class="text-sm font-bold text-gray-700 whitespace-nowrap">Choose Option:</label>
+                <select id="reportFilterSelect" onchange="renderModalReportTable()" class="w-full sm:w-72 p-2.5 border border-gray-300 rounded-xl bg-white text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500"></select>
+                <span id="reportItemCountBadge" class="bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-full ml-auto">0 Items Found</span>
+            </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-md overflow-x-auto border border-gray-100">
-                    <div class="flex flex-col sm:flex-row justify-between items-center border-b pb-4 mb-4 gap-3">
-                        <h2 id="tableTitle" class="text-xl font-bold text-gray-800">Stored Inventory Items</h2>
-                        <div class="flex gap-2">
-                            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow cursor-pointer flex items-center gap-1.5">📊 Export Excel</button>
-                            <button onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow cursor-pointer flex items-center gap-1.5">📄 Export PDF</button>
-                        </div>
-                    </div>
-                    <table class="w-full text-start border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-gray-50 text-gray-700 border-b border-gray-200">
-                                <th id="thSr" class="p-3 text-start">Sr. No</th>
-                                <th id="thCode" class="p-3 text-start">Code</th>
-                                <th id="thName" class="p-3 text-start">Item Name</th>
-                                <th id="thDates" class="p-3 text-start">Purchase / Warranty</th>
-                                <th id="thDept" class="p-3 text-start">Dept / Loc</th>
-                                <th id="thStatus" class="p-3 text-start">Status</th>
-                                <th id="thRemarks" class="p-3 text-start">Remarks</th>
-                                <th id="thAction" class="p-3 text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventoryTableBody">
-                            <tr><td colspan="8" class="p-4 text-center text-gray-400">Loading data from database...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="overflow-y-auto flex-1 border rounded-xl">
+                <table class="w-full text-start border-collapse text-sm">
+                    <thead class="bg-gray-100 sticky top-0">
+                        <tr class="text-gray-700 border-b">
+                            <th id="mThSr" class="p-3 text-start">Sr. No</th>
+                            <th id="mThCode" class="p-3 text-start">Item Code</th>
+                            <th id="mThName" class="p-3 text-start">Item Name</th>
+                            <th id="mThIP" class="p-3 text-start">IP / MAC</th>
+                            <th id="mThDept" class="p-3 text-start">Department</th>
+                            <th id="mThLoc" class="p-3 text-start">Location / Branch</th>
+                            <th id="mThDates" class="p-3 text-start">Purchase / Warranty</th>
+                            <th id="mThStatus" class="p-3 text-start">Status</th>
+                            <th id="mThRemarks" class="p-3 text-start">Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalReportTableBody"></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -249,29 +346,29 @@
     <div id="addDeptModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-sm w-full p-6 rounded-2xl shadow-2xl space-y-3">
             <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-gray-800">Add New Department</h3>
+                <h3 id="modalDeptTitle" class="font-bold text-gray-800">Add New Department</h3>
                 <button onclick="closeAddDeptModal()" class="text-gray-500 font-bold">&times;</button>
             </div>
             <input type="text" id="customDeptInput" placeholder="Enter department name..." class="w-full p-3 border rounded-xl outline-none">
-            <button onclick="saveNewDepartment()" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl cursor-pointer">Add Department</button>
+            <button onclick="saveNewDepartment()" id="modalDeptBtn" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl cursor-pointer">Add Department</button>
         </div>
     </div>
 
     <div id="addLocModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-sm w-full p-6 rounded-2xl shadow-2xl space-y-3">
             <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-gray-800">Add New Location / Branch</h3>
+                <h3 id="modalLocTitle" class="font-bold text-gray-800">Add New Location / Branch</h3>
                 <button onclick="closeAddLocModal()" class="text-gray-500 font-bold">&times;</button>
             </div>
             <input type="text" id="customLocInput" placeholder="Enter location/branch name..." class="w-full p-3 border rounded-xl outline-none">
-            <button onclick="saveNewLocation()" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl cursor-pointer">Add Location</button>
+            <button onclick="saveNewLocation()" id="modalLocBtn" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl cursor-pointer">Add Location</button>
         </div>
     </div>
 
     <div id="approvalModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-2xl w-full p-6 rounded-2xl shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-800">Pending Authorization Requests</h3>
+                <h3 id="modalApprTitle" class="text-lg font-bold text-gray-800">Pending Authorization Requests</h3>
                 <button onclick="closeApprovalModal()" class="text-gray-500 font-bold text-lg">&times;</button>
             </div>
             <div id="approvalList" class="space-y-3 max-h-96 overflow-y-auto"></div>
@@ -281,26 +378,26 @@
     <div id="addUserModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-800">Add New User</h3>
+                <h3 id="modalAddUserTitle" class="text-lg font-bold text-gray-800">Add New User</h3>
                 <button onclick="closeAddUserModal()" class="text-gray-500 font-bold text-lg">&times;</button>
             </div>
             <form id="addUserForm" class="space-y-3">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700">Username</label>
+                    <label id="lblNewUser" class="block text-sm font-semibold text-gray-700">Username</label>
                     <input type="text" id="newUsername" required class="w-full mt-1 p-3 border rounded-xl outline-none" placeholder="e.g. John">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700">Role</label>
+                    <label id="lblNewRole" class="block text-sm font-semibold text-gray-700">Role</label>
                     <select id="newUserRole" class="w-full mt-1 p-3 border rounded-xl outline-none bg-white">
                         <option value="assistant_edit">IT Assistant (Editing Mode - No Delete)</option>
                         <option value="assistant_view">IT Assistant 1 (View Only - Needs Approval)</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700">Password</label>
+                    <label id="lblNewPass" class="block text-sm font-semibold text-gray-700">Password</label>
                     <input type="password" id="newUserPassword" required class="w-full mt-1 p-3 border rounded-xl outline-none">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl cursor-pointer">Save User</button>
+                <button type="submit" id="btnSaveUser" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl cursor-pointer">Save User</button>
             </form>
         </div>
     </div>
@@ -308,19 +405,19 @@
     <div id="changePasswordModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-800">Change Password</h3>
+                <h3 id="modalChangePassTitle" class="text-lg font-bold text-gray-800">Change Password</h3>
                 <button onclick="closeChangePasswordModal()" class="text-gray-500 font-bold text-lg">&times;</button>
             </div>
             <form id="changePasswordForm" class="space-y-3">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700">Select User</label>
+                    <label id="lblTargetUser" class="block text-sm font-semibold text-gray-700">Select User</label>
                     <select id="targetUserSelect" class="w-full mt-1 p-3 border rounded-xl outline-none bg-white"></select>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700">New Password</label>
+                    <label id="lblTargetPass" class="block text-sm font-semibold text-gray-700">New Password</label>
                     <input type="password" id="targetNewPassword" required class="w-full mt-1 p-3 border rounded-xl outline-none">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl cursor-pointer">Update Password</button>
+                <button type="submit" id="btnUpdatePass" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl cursor-pointer">Update Password</button>
             </form>
         </div>
     </div>
@@ -347,8 +444,19 @@
 
         let currentUser = null;
         let usersList = [];
-        let departmentsList = ["IT Support", "Kitchen", "Cashier / POS", "Management"];
-        let locationsList = ["Branch Main Hall", "Server Room", "Kitchen Counter", "Store Room"];
+        
+        let departmentsList = [
+            "Purchase", "Marketing", "Secretary", "Accounts", 
+            "Operation", "Factory", "Warehouse", "IT Support", 
+            "Kitchen", "Cashier / POS", "Management"
+        ];
+        
+        let locationsList = [
+            "KTY1", "KTY2", "KTY3", "KTY4", "KTY5", 
+            "KTY6", "KTY7", "KTY8", "KTY9", "KTY10", 
+            "KTY11", "KTY12", "KTY13", "KTY14", "KTY15",
+            "Branch Main Hall", "Server Room", "Kitchen Counter", "Store Room"
+        ];
 
         const qrContainer = document.getElementById("qrcode");
         let qrcodeInstance = new QRCode(qrContainer, { width: 160, height: 160 });
@@ -356,31 +464,52 @@
         const translations = {
             en: {
                 dir: "ltr", switcher: "العربية", subtitle: "Property of Ktaykit Fast Food",
+                headerTitle: "KTAYKIT IT INV", logout: "Logout",
+                pendingAuth: "⚠️ Pending Authorizations:", reviewReq: "Review Requests",
+                addUser: "➕ Add User", changePass: "🔑 Change Password", btnAddItemPopup: "➕ Add New Item",
+                dashTotal: "Total Items (Show All)", dashActive: "Active Items", dashMaint: "Maintenance", dashDamage: "Damaged / Inactive",
+                deptReportTitle: "🏢 Department Wise Report", selectDeptRep: "Select & View Report", deptReportSub: "Click any department below or use the button above to inspect items:",
+                locReportTitle: "📍 Location / Branch Report", branchAll: "Branch Wise (All)", chooseLoc: "Choose Location", locReportSub: "Click \"Branch Wise (All)\" for full list or choose a specific location:",
+                scanViewTitle: "Scanned Item Information", backHome: "Back to Home",
                 formTitle: "Item Entry Form", lblSrNo: "Sr. No (Auto)", lblItemCode: "Item Code (Auto)",
-                lblItemName: "Item Name", lblDesc: "Description", lblPurchaseDate: "Purchase Date",
+                lblItemName: "Item Name", lblIpAddress: "IP Address", lblMacAddress: "MAC Address", lblDesc: "Description", lblPurchaseDate: "Purchase Date",
                 lblWarranty: "Warranty Date", lblDept: "Department", lblLoc: "Location / Branch", lblStatus: "Status",
                 lblRemarks: "Remarks", optActive: "Active", optInactive: "Inactive", optMaint: "Maintenance", optDamage: "Damage",
-                btnSubmit: "Add Item & QR", btnUpdate: "Update Item", tableTitle: "Stored Inventory Items", thSr: "Sr. No",
-                thCode: "Code", thName: "Item Name", thDates: "Purchase / Warranty", thDept: "Dept / Loc",
+                btnSubmit: "Add Item & QR", btnUpdate: "Update Item", btnCancel: "Cancel", tableTitle: "Stored Inventory Items",
+                thSr: "Sr. No", thCode: "Code", thName: "Item Name", thIP: "IP / MAC", thDates: "Purchase / Warranty", thDept: "Dept / Loc",
                 thStatus: "Status", thRemarks: "Remarks", thAction: "Actions", btnAction: "QR", btnEdit: "Edit", btnDel: "Delete",
-                qrTitle: "QR Code", btnPrint: "Print QR Label", alertSuccess: "Item Successfully Added!", alertRequestSent: "Request sent to Admin!"
+                qrTitle: "QR Code", btnPrint: "Print QR Label", btnExcel: "📊 Export Excel", btnPDF: "📄 Export PDF",
+                alertSuccess: "Item Successfully Added!", alertRequestSent: "Request sent to Admin!",
+                itemsFound: "Items Found",
+                statusActiveText: "Active", statusInactiveText: "Inactive", statusMaintText: "Maintenance", statusDamageText: "Damage"
             },
             ar: {
                 dir: "rtl", switcher: "English", subtitle: "ملك لـ كتيكت للوجبات السريعة",
+                headerTitle: "نظام إدارة تكنولوجيا المعلومات - كتيكت", logout: "تسجيل الخروج",
+                pendingAuth: "⚠️ الموافقات المعلقة:", reviewReq: "مراجعة الطلبات",
+                addUser: "➕ إضافة مستخدم", changePass: "🔑 تغيير كلمة المرور", btnAddItemPopup: "➕ إضافة مادة جديدة",
+                dashTotal: "إجمالي المواد (عرض الكل)", dashActive: "المواد النشطة", dashMaint: "قيد الصيانة", dashDamage: "التالفة / غير النشطة",
+                deptReportTitle: "🏢 تقرير حسب الأقسام", selectDeptRep: "اختر وعرض التقرير", deptReportSub: "انقر على أي قسم أدناه أو استخدم الزر أعلاه لفحص المواد:",
+                locReportTitle: "📍 تقرير حسب المواقع / الفروع", branchAll: "حسب الفروع (الكل)", chooseLoc: "اختر الموقع", locReportSub: "انقر على \"حسب الفروع (الكل)\" للقائمة الكاملة أو اختر موقعاً محدداً:",
+                scanViewTitle: "معلومات المادة الممسوحة ضوئياً", backHome: "العودة للرئيسية",
                 formTitle: "نموذج إدخال المواد", lblSrNo: "الرقم التسلسلي (تلقائي)", lblItemCode: "رمز المادة (تلقائي)",
-                lblItemName: "اسم المادة", lblDesc: "الوصف", lblPurchaseDate: "تاريخ الشراء",
+                lblItemName: "اسم المادة", lblIpAddress: "عنوان IP", lblMacAddress: "عنوان MAC", lblDesc: "الوصف", lblPurchaseDate: "تاريخ الشراء",
                 lblWarranty: "تاريخ الضمان", lblDept: "القسم", lblLoc: "الموقع / الفرع", lblStatus: "الحالة",
                 lblRemarks: "الملاحظات", optActive: "نشط", optInactive: "غير نشط", optMaint: "صيانة", optDamage: "تالف",
-                btnSubmit: "إضافة المادة ورمز QR", btnUpdate: "تحديث المادة", tableTitle: "المواد المخزنة في المستودع", thSr: "الرقم",
-                thCode: "الرمز", thName: "اسم المادة", thDates: "الشراء / الضمان", thDept: "القسم / الموقع",
+                btnSubmit: "إضافة المادة ورمز QR", btnUpdate: "تحديث المادة", btnCancel: "إلغاء", tableTitle: "المواد المخزنة في المستودع",
+                thSr: "الرقم", thCode: "الرمز", thName: "اسم المادة", thIP: "IP / MAC", thDates: "الشراء / الضمان", thDept: "القسم / الموقع",
                 thStatus: "الحالة", thRemarks: "الملاحظات", thAction: "الإجراءات", btnAction: "QR", btnEdit: "تعديل", btnDel: "حذف",
-                qrTitle: "رمز QR", printBtn: "طباعة ملصق QR", alertSuccess: "تم إضافة المادة بنجاح!", alertRequestSent: "تم إرسال الطلب إلى المسؤول!"
+                qrTitle: "رمز QR", btnPrint: "طباعة ملصق QR", btnExcel: "📊 تصدير إكسل", btnPDF: "📄 تصدير PDF",
+                alertSuccess: "تم إضافة المادة بنجاح!", alertRequestSent: "تم إرسال الطلب إلى المسؤول!",
+                itemsFound: "مادة موجودة",
+                statusActiveText: "نشط", statusInactiveText: "غير نشط", statusMaintText: "صيانة", statusDamageText: "تالف"
             }
         };
 
         let currentLang = "en";
         let localItemsList = [];
         let pendingRequestsList = [];
+        let currentReportMode = "location";
 
         function updateDropdowns() {
             const deptSelect = document.getElementById("department");
@@ -405,6 +534,117 @@
             if (locationsList.includes(currentLoc)) locSelect.value = currentLoc;
         }
 
+        // Popup Modal Controls
+        window.openItemEntryModal = function() {
+            document.getElementById("itemEntryModal").classList.remove("hidden");
+            if (!document.getElementById("editingDocId").value) {
+                generateAutoValues();
+            }
+        }
+        window.closeItemEntryModal = function() {
+            document.getElementById("itemEntryModal").classList.add("hidden");
+        }
+
+        window.openFilterReportModal = function(mode, preselectVal = "ALL") {
+            currentReportMode = mode;
+            const modal = document.getElementById("filterReportModal");
+            const titleEl = document.getElementById("reportModalTitle");
+            const selectorBar = document.getElementById("reportSelectorBar");
+            const selectorLabel = document.getElementById("reportSelectorLabel");
+            const selectEl = document.getElementById("reportFilterSelect");
+
+            selectEl.innerHTML = "";
+
+            if (mode === "branch_all") {
+                titleEl.innerText = currentLang === "ar" ? "📍 قائمة جرد الفروع الكاملة" : "📍 Branch Wise Complete Inventory List";
+                selectorBar.classList.add("hidden");
+            } else if (mode === "location") {
+                titleEl.innerText = currentLang === "ar" ? "📍 تقرير الجرد حسب الموقع" : "📍 Location Wise Inventory Report";
+                selectorBar.classList.remove("hidden");
+                selectorLabel.innerText = currentLang === "ar" ? "اختر الموقع / الفرع:" : "Choose Location / Branch:";
+                
+                const allOpt = document.createElement("option");
+                allOpt.value = "ALL"; allOpt.innerText = currentLang === "ar" ? "-- كل المواقع --" : "-- All Locations --";
+                selectEl.appendChild(allOpt);
+
+                const allLocs = Array.from(new Set([...locationsList, ...localItemsList.map(i => i.location)]));
+                allLocs.forEach(loc => {
+                    const opt = document.createElement("option");
+                    opt.value = loc; opt.innerText = loc;
+                    selectEl.appendChild(opt);
+                });
+                selectEl.value = preselectVal;
+            } else if (mode === "department") {
+                titleEl.innerText = currentLang === "ar" ? "🏢 تقرير الجرد حسب الأقسام" : "🏢 Department Wise Inventory Report";
+                selectorBar.classList.remove("hidden");
+                selectorLabel.innerText = currentLang === "ar" ? "اختر القسم:" : "Choose Department:";
+
+                const allOpt = document.createElement("option");
+                allOpt.value = "ALL"; allOpt.innerText = currentLang === "ar" ? "-- كل الأقسام --" : "-- All Departments --";
+                selectEl.appendChild(allOpt);
+
+                const allDepts = Array.from(new Set([...departmentsList, ...localItemsList.map(i => i.department)]));
+                allDepts.forEach(dept => {
+                    const opt = document.createElement("option");
+                    opt.value = dept; opt.innerText = dept;
+                    selectEl.appendChild(opt);
+                });
+                selectEl.value = preselectVal;
+            }
+
+            renderModalReportTable();
+            modal.classList.remove("hidden");
+        }
+
+        window.closeFilterReportModal = function() {
+            document.getElementById("filterReportModal").classList.add("hidden");
+        }
+
+        window.renderModalReportTable = function() {
+            const tbody = document.getElementById("modalReportTableBody");
+            const selectVal = document.getElementById("reportFilterSelect").value;
+            let filtered = [...localItemsList];
+
+            if (currentReportMode === "branch_all") {
+                filtered.sort((a, b) => (a.location || "").localeCompare(b.location || ""));
+            } else if (currentReportMode === "location" && selectVal !== "ALL") {
+                filtered = filtered.filter(item => item.location === selectVal);
+            } else if (currentReportMode === "department" && selectVal !== "ALL") {
+                filtered = filtered.filter(item => item.department === selectVal);
+            }
+
+            document.getElementById("reportItemCountBadge").innerText = `${filtered.length} ${translations[currentLang].itemsFound}`;
+            tbody.innerHTML = "";
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-gray-400 font-medium">${currentLang === "ar" ? "لا توجد مواد مطابقة." : "No items found under this selection."}</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                let statusColor = "bg-green-100 text-green-800";
+                let sText = item.status;
+                if (item.status === "Active") sText = translations[currentLang].statusActiveText;
+                else if (item.status === "Inactive") { statusColor = "bg-red-100 text-red-800"; sText = translations[currentLang].statusInactiveText; }
+                else if (item.status === "Maintenance") { statusColor = "bg-yellow-100 text-yellow-800"; sText = translations[currentLang].statusMaintText; }
+                else if (item.status === "Damage") { statusColor = "bg-rose-100 text-rose-900 font-bold"; sText = translations[currentLang].statusDamageText; }
+
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3 font-mono text-gray-700">${item.srNo}</td>
+                        <td class="p-3 font-mono text-blue-600 font-semibold">${item.itemCode}</td>
+                        <td class="p-3 font-bold text-gray-800">${item.itemName}</td>
+                        <td class="p-3 font-mono text-xs text-gray-600">IP: ${item.ipAddress || 'N/A'}<br>MAC: ${item.macAddress || 'N/A'}</td>
+                        <td class="p-3 text-gray-700">${item.department}</td>
+                        <td class="p-3 font-semibold text-indigo-700">${item.location}</td>
+                        <td class="p-3 text-xs text-gray-600">P: ${item.purchaseDate || 'N/A'}<br>W: ${item.warrantyDate || 'N/A'}</td>
+                        <td class="p-3"><span class="px-2.5 py-0.5 text-xs rounded-full font-medium ${statusColor}">${sText}</span></td>
+                        <td class="p-3 text-xs text-gray-600">${item.remarks}</td>
+                    </tr>
+                `;
+            });
+        }
+
         window.openAddDepartmentModal = function() { document.getElementById("addDeptModal").classList.remove("hidden"); document.getElementById("customDeptInput").focus(); }
         window.closeAddDeptModal = function() { document.getElementById("addDeptModal").classList.add("hidden"); document.getElementById("customDeptInput").value = ""; }
         window.saveNewDepartment = function() {
@@ -427,14 +667,15 @@
             closeAddLocModal();
         }
 
-        // Fetch Users & Populate Datalist
         onSnapshot(usersCollection, async (snapshot) => {
             usersList = [];
             snapshot.forEach(doc => usersList.push({ id: doc.id, ...doc.data() }));
             if (usersList.length === 0) {
-                await setDoc(doc(usersCollection, "admin"), { name: "admin", role: "admin", password: "123456" });
-                await setDoc(doc(usersCollection, "assistant_edit"), { name: "assistant_edit", role: "assistant_edit", password: "123" });
-                await setDoc(doc(usersCollection, "assistant_view"), { name: "assistant_view", role: "assistant_view", password: "123" });
+                try {
+                    await setDoc(doc(usersCollection, "admin"), { name: "admin", role: "admin", password: "123456" });
+                    await setDoc(doc(usersCollection, "assistant_edit"), { name: "assistant_edit", role: "assistant_edit", password: "123" });
+                    await setDoc(doc(usersCollection, "assistant_view"), { name: "assistant_view", role: "assistant_view", password: "123" });
+                } catch(e) { console.warn("Firestore default user init:", e); }
                 return;
             }
             populateUserDatalist();
@@ -466,7 +707,7 @@
                 } else if (inputVal === "assistant_view" && password === "123") {
                     user = { id: "assistant_view", name: "IT Assistant 1", role: "assistant_view", password: "123" };
                 } else {
-                    alert("User not found or incorrect password! Please check username and password.");
+                    alert("User not found or incorrect password!");
                     return;
                 }
             }
@@ -477,6 +718,8 @@
             }
 
             currentUser = user;
+            localStorage.setItem('ktaykit_logged_user', JSON.stringify(currentUser));
+
             document.getElementById("loginScreen").classList.add("hidden");
             document.getElementById("appContainer").classList.remove("hidden");
             document.getElementById("loggedInUserBadge").innerText = `👤 ${currentUser.name} (${currentUser.role})`;
@@ -486,6 +729,7 @@
 
         window.logout = function() {
             currentUser = null;
+            localStorage.removeItem('ktaykit_logged_user');
             document.getElementById("appContainer").classList.add("hidden");
             document.getElementById("loginScreen").classList.remove("hidden");
             document.getElementById("inventoryForm").reset();
@@ -496,14 +740,18 @@
             const formInputs = document.querySelectorAll("#inventoryForm input, #inventoryForm textarea, #inventoryForm select, #btnSubmit");
             if (currentUser.role === "assistant_view") {
                 formInputs.forEach(el => el.disabled = true);
-                document.getElementById("btnSubmit").innerText = "View Only Mode";
+                document.getElementById("btnSubmit").innerText = currentLang === "ar" ? "وضع العرض فقط" : "View Only Mode";
             } else {
                 formInputs.forEach(el => el.disabled = false);
             }
             if (currentUser.role === "admin") {
                 document.getElementById("adminControlBar").classList.remove("hidden");
+                document.getElementById("btnAddUser").classList.remove("hidden");
+                document.getElementById("btnChangePass").classList.remove("hidden");
             } else {
                 document.getElementById("adminControlBar").classList.add("hidden");
+                document.getElementById("btnAddUser").classList.add("hidden");
+                document.getElementById("btnChangePass").classList.add("hidden");
             }
         }
 
@@ -540,6 +788,7 @@
             closeChangePasswordModal();
         });
 
+        // Language Switcher Event
         document.getElementById("langSwitcher").addEventListener("click", () => {
             currentLang = currentLang === "en" ? "ar" : "en";
             applyLanguage(currentLang);
@@ -549,12 +798,41 @@
             const data = translations[lang];
             document.documentElement.dir = data.dir;
             document.documentElement.lang = lang;
+            
             document.getElementById("langSwitcher").innerText = data.switcher;
+            document.getElementById("headerTitle").innerText = data.headerTitle;
             document.getElementById("headerSubtitle").innerText = data.subtitle;
+            document.getElementById("btnLogout").innerText = data.logout;
+
+            document.getElementById("lblPendingAuth").innerText = data.pendingAuth;
+            document.getElementById("btnReviewReq").innerText = data.reviewReq;
+            document.getElementById("btnAddUser").innerText = data.addUser;
+            document.getElementById("btnChangePass").innerText = data.changePass;
+            document.getElementById("btnAddItemPopup").innerText = data.btnAddItemPopup;
+
+            document.getElementById("lblDashTotal").innerText = data.dashTotal;
+            document.getElementById("lblDashActive").innerText = data.dashActive;
+            document.getElementById("lblDashMaint").innerText = data.dashMaint;
+            document.getElementById("lblDashDamage").innerText = data.dashDamage;
+
+            document.getElementById("lblDeptReportTitle").innerText = data.deptReportTitle;
+            document.getElementById("btnSelectDeptRep").innerText = data.selectDeptRep;
+            document.getElementById("lblDeptReportSub").innerText = data.deptReportSub;
+
+            document.getElementById("lblLocReportTitle").innerText = data.locReportTitle;
+            document.getElementById("btnBranchAll").innerText = data.branchAll;
+            document.getElementById("btnChooseLoc").innerText = data.chooseLoc;
+            document.getElementById("lblLocReportSub").innerText = data.locReportSub;
+
+            document.getElementById("scanViewTitle").innerText = data.scanViewTitle;
+            document.getElementById("btnBackHome").innerText = data.backHome;
+
             document.getElementById("formTitle").innerText = data.formTitle;
             document.getElementById("lblSrNo").innerText = data.lblSrNo;
             document.getElementById("lblItemCode").innerText = data.lblItemCode;
             document.getElementById("lblItemName").innerText = data.lblItemName;
+            document.getElementById("lblIpAddress").innerText = data.lblIpAddress;
+            document.getElementById("lblMacAddress").innerText = data.lblMacAddress;
             document.getElementById("lblDesc").innerText = data.lblDesc;
             document.getElementById("lblPurchaseDate").innerText = data.lblPurchaseDate;
             document.getElementById("lblWarranty").innerText = data.lblWarranty;
@@ -562,11 +840,33 @@
             document.getElementById("lblLoc").innerText = data.lblLoc;
             document.getElementById("lblStatus").innerText = data.lblStatus;
             document.getElementById("lblRemarks").innerText = data.lblRemarks;
+            
             document.getElementById("optActive").innerText = data.optActive;
             document.getElementById("optInactive").innerText = data.optInactive;
             document.getElementById("optMaint").innerText = data.optMaint;
             document.getElementById("optDamage").innerText = data.optDamage;
+
+            const editingId = document.getElementById("editingDocId").value;
+            if (!editingId) {
+                document.getElementById("btnSubmit").innerText = data.btnSubmit;
+            }
+
+            document.getElementById("tableTitle").innerText = data.tableTitle;
+            document.getElementById("thSr").innerText = data.thSr;
+            document.getElementById("thCode").innerText = data.thCode;
+            document.getElementById("thName").innerText = data.thName;
+            document.getElementById("thIP").innerText = data.thIP;
+            document.getElementById("thDates").innerText = data.thDates;
+            document.getElementById("thDept").innerText = data.thDept;
+            document.getElementById("thStatus").innerText = data.thStatus;
+            document.getElementById("thRemarks").innerText = data.thRemarks;
+            document.getElementById("thAction").innerText = data.thAction;
+
+            document.getElementById("btnExcel").innerText = data.btnExcel;
+            document.getElementById("btnPDF").innerText = data.btnPDF;
+
             renderTable();
+            updateDashboardMetrics();
         }
 
         document.getElementById("inventoryForm").addEventListener("submit", async (e) => {
@@ -578,6 +878,8 @@
                 srNo: document.getElementById("srNo").value,
                 itemCode: document.getElementById("itemCode").value,
                 itemName: document.getElementById("itemName").value,
+                ipAddress: document.getElementById("ipAddress").value.trim() || '-',
+                macAddress: document.getElementById("macAddress").value.trim() || '-',
                 description: document.getElementById("description").value,
                 purchaseDate: document.getElementById("purchaseDate").value,
                 warrantyDate: document.getElementById("warrantyDate").value,
@@ -592,18 +894,27 @@
                 if (!currentUser || currentUser.role === "admin") {
                     if (editId) {
                         await updateDoc(doc(db, "items", editId), itemData);
-                        alert("Item updated!");
+                        alert(currentLang === "ar" ? "تم تحديث المادة!" : "Item updated!");
                         cancelEditMode();
+                        closeItemEntryModal();
                     } else {
                         const docRef = await addDoc(inventoryCollection, itemData);
                         showQRCode(docRef.id, itemData.itemName, itemData.itemCode);
                         alert(translations[currentLang].alertSuccess);
+                        
+                        // Clear fields except Sr. No and Item Code
                         document.getElementById("itemName").value = "";
+                        document.getElementById("ipAddress").value = "";
+                        document.getElementById("macAddress").value = "";
                         document.getElementById("description").value = "";
                         document.getElementById("purchaseDate").value = "";
                         document.getElementById("warrantyDate").value = "";
+                        document.getElementById("department").selectedIndex = 0;
+                        document.getElementById("location").selectedIndex = 0;
+                        document.getElementById("status").selectedIndex = 0;
                         document.getElementById("remarks").value = "";
                         generateAutoValues();
+                        closeItemEntryModal();
                     }
                 } else {
                     await addDoc(requestsCollection, {
@@ -615,6 +926,7 @@
                     });
                     alert(translations[currentLang].alertRequestSent);
                     cancelEditMode();
+                    closeItemEntryModal();
                 }
             } catch (error) {
                 console.error("Error:", error);
@@ -658,13 +970,23 @@
             const deptListEl = document.getElementById("deptSummaryList");
             deptListEl.innerHTML = "";
             for (const [dept, count] of Object.entries(deptCounts)) {
-                deptListEl.innerHTML += `<div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-xl border"><span class="font-semibold text-gray-700">${dept}</span><span class="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full font-bold text-xs">${count} items</span></div>`;
+                const itemsText = currentLang === "ar" ? "مادة" : "items";
+                deptListEl.innerHTML += `
+                    <div onclick="openFilterReportModal('department', '${dept}')" class="flex justify-between items-center bg-gray-50 hover:bg-blue-50 p-2.5 rounded-xl border cursor-pointer transition">
+                        <span class="font-semibold text-gray-700">${dept}</span>
+                        <span class="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full font-bold text-xs">${count} ${itemsText} ←</span>
+                    </div>`;
             }
 
             const locListEl = document.getElementById("locSummaryList");
             locListEl.innerHTML = "";
             for (const [loc, count] of Object.entries(locCounts)) {
-                locListEl.innerHTML += `<div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-xl border"><span class="font-semibold text-gray-700">${loc}</span><span class="bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full font-bold text-xs">${count} items</span></div>`;
+                const itemsText = currentLang === "ar" ? "مادة" : "items";
+                locListEl.innerHTML += `
+                    <div onclick="openFilterReportModal('location', '${loc}')" class="flex justify-between items-center bg-gray-50 hover:bg-indigo-50 p-2.5 rounded-xl border cursor-pointer transition">
+                        <span class="font-semibold text-gray-700">${loc}</span>
+                        <span class="bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full font-bold text-xs">${count} ${itemsText} ←</span>
+                    </div>`;
             }
         }
 
@@ -683,7 +1005,7 @@
             const tableBody = document.getElementById("inventoryTableBody");
             tableBody.innerHTML = "";
             if (localItemsList.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-gray-400">No items found.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-gray-400">${currentLang === "ar" ? "لا توجد مواد مخزنة." : "No items found."}</td></tr>`;
                 return;
             }
             localItemsList.forEach((item) => {
@@ -692,25 +1014,31 @@
                 
                 let statusColor = "bg-green-100 text-green-800";
                 let statusText = item.status;
-                if (item.status === "Inactive") statusColor = "bg-red-100 text-red-800";
-                else if (item.status === "Maintenance") statusColor = "bg-yellow-100 text-yellow-800";
-                else if (item.status === "Damage") statusColor = "bg-rose-100 text-rose-900 font-bold";
+                if (item.status === "Active") statusText = translations[currentLang].statusActiveText;
+                else if (item.status === "Inactive") { statusColor = "bg-red-100 text-red-800"; statusText = translations[currentLang].statusInactiveText; }
+                else if (item.status === "Maintenance") { statusColor = "bg-yellow-100 text-yellow-800"; statusText = translations[currentLang].statusMaintText; }
+                else if (item.status === "Damage") { statusColor = "bg-rose-100 text-rose-900 font-bold"; statusText = translations[currentLang].statusDamageText; }
 
-                let actionButtons = `<button class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1.5 rounded-lg shadow cursor-pointer scan-qr-btn" data-id="${item.id}" data-name="${item.itemName}" data-code="${item.itemCode}">QR</button>`;
+                const btnActionText = translations[currentLang].btnAction;
+                const btnEditText = translations[currentLang].btnEdit;
+                const btnDelText = translations[currentLang].btnDel;
+
+                let actionButtons = `<button class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1.5 rounded-lg shadow cursor-pointer scan-qr-btn" data-id="${item.id}" data-name="${item.itemName}" data-code="${item.itemCode}">${btnActionText}</button>`;
 
                 if (currentUser && currentUser.role !== "assistant_view") {
-                    actionButtons += `<button class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1.5 rounded-lg shadow cursor-pointer edit-btn ml-1" data-id="${item.id}">Edit</button>`;
+                    actionButtons += `<button class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1.5 rounded-lg shadow cursor-pointer edit-btn ml-1" data-id="${item.id}">${btnEditText}</button>`;
                 }
                 if (currentUser && currentUser.role === "admin") {
-                    actionButtons += `<button class="bg-red-600 hover:bg-red-700 text-white text-xs px-2.5 py-1.5 rounded-lg shadow cursor-pointer delete-btn ml-1" data-id="${item.id}">Delete</button>`;
+                    actionButtons += `<button class="bg-red-600 hover:bg-red-700 text-white text-xs px-2.5 py-1.5 rounded-lg shadow cursor-pointer delete-btn ml-1" data-id="${item.id}">${btnDelText}</button>`;
                 }
 
                 row.innerHTML = `
                     <td class="p-3 font-mono font-medium text-gray-700">${item.srNo}</td>
                     <td class="p-3 font-mono text-blue-600 font-semibold">${item.itemCode}</td>
                     <td class="p-3 font-semibold text-gray-900">${item.itemName}</td>
+                    <td class="p-3 font-mono text-xs text-gray-600">IP: ${item.ipAddress || 'N/A'}<br>MAC: ${item.macAddress || 'N/A'}</td>
                     <td class="p-3 text-xs text-gray-600">P: ${item.purchaseDate || 'N/A'}<br>W: ${item.warrantyDate || 'N/A'}</td>
-                    <td class="p-3 text-gray-500">${item.department} <br> <span class="text-xs text-gray-400">${item.location}</span></td>
+                    <td class="p-3 text-gray-500">${item.department} <br> <span class="text-xs text-indigo-600 font-semibold">${item.location}</span></td>
                     <td class="p-3"><span class="px-2.5 py-1 text-xs rounded-full font-medium ${statusColor}">${statusText}</span></td>
                     <td class="p-3 text-gray-600 text-xs">${item.remarks}</td>
                     <td class="p-3 text-center whitespace-nowrap">${actionButtons}</td>
@@ -733,7 +1061,7 @@
             const list = document.getElementById("approvalList");
             list.innerHTML = "";
             if (pendingRequestsList.length === 0) {
-                list.innerHTML = `<p class="text-gray-500 text-center py-4">No pending requests.</p>`;
+                list.innerHTML = `<p class="text-gray-500 text-center py-4">${currentLang === "ar" ? "لا توجد طلبات معلقة." : "No pending requests."}</p>`;
             } else {
                 pendingRequestsList.forEach(req => {
                     const div = document.createElement("div");
@@ -782,6 +1110,8 @@
             document.getElementById("srNo").value = item.srNo;
             document.getElementById("itemCode").value = item.itemCode;
             document.getElementById("itemName").value = item.itemName;
+            document.getElementById("ipAddress").value = item.ipAddress || "";
+            document.getElementById("macAddress").value = item.macAddress || "";
             document.getElementById("description").value = item.description || "";
             document.getElementById("purchaseDate").value = item.purchaseDate || "";
             document.getElementById("warrantyDate").value = item.warrantyDate || "";
@@ -789,9 +1119,11 @@
             document.getElementById("location").value = item.location;
             document.getElementById("status").value = item.status;
             document.getElementById("remarks").value = item.remarks === '-' ? '' : item.remarks;
-            document.getElementById("btnSubmit").innerText = currentUser && currentUser.role === "admin" ? "Update Item" : "Submit Update for Approval";
+            document.getElementById("btnSubmit").innerText = currentUser && currentUser.role === "admin" ? (currentLang === "ar" ? "تحديث المادة" : "Update Item") : (currentLang === "ar" ? "إرسال للموافقة" : "Submit Update for Approval");
             document.getElementById("btnCancelEdit").classList.remove("hidden");
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Open modal to show edit form
+            openItemEntryModal();
         }
 
         window.cancelEditMode = function() {
@@ -800,6 +1132,7 @@
             document.getElementById("btnSubmit").innerText = translations[currentLang].btnSubmit;
             document.getElementById("btnCancelEdit").classList.add("hidden");
             generateAutoValues();
+            closeItemEntryModal();
         }
 
         async function deleteItem(id) {
@@ -825,13 +1158,22 @@
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
+            const savedUser = localStorage.getItem('ktaykit_logged_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById("loginScreen").classList.add("hidden");
+                document.getElementById("appContainer").classList.remove("hidden");
+                document.getElementById("loggedInUserBadge").innerText = `👤 ${currentUser.name} (${currentUser.role})`;
+                applyPermissions();
+                updateDropdowns();
+            }
+
             const urlParams = new URLSearchParams(window.location.search);
             const viewItemId = urlParams.get('viewItem');
             
             if (viewItemId) {
                 document.getElementById("loginScreen").classList.add("hidden");
                 document.getElementById("appContainer").classList.remove("hidden");
-                document.getElementById("mainDashboard").classList.add("hidden");
                 
                 const scanCard = document.getElementById("scannedItemView");
                 const detailsBox = document.getElementById("scannedItemDetails");
@@ -847,6 +1189,8 @@
                                 <p><strong>Sr. No:</strong> ${item.srNo}</p>
                                 <p><strong>Item Code:</strong> <span class="font-mono text-blue-600">${item.itemCode}</span></p>
                                 <p><strong>Item Name:</strong> ${item.itemName}</p>
+                                <p><strong>IP Address:</strong> <span class="font-mono">${item.ipAddress || 'N/A'}</span></p>
+                                <p><strong>MAC Address:</strong> <span class="font-mono">${item.macAddress || 'N/A'}</span></p>
                                 <p><strong>Description:</strong> ${item.description || 'N/A'}</p>
                                 <p><strong>Purchase Date:</strong> ${item.purchaseDate || 'N/A'}</p>
                                 <p><strong>Warranty Date:</strong> ${item.warrantyDate || 'N/A'}</p>
@@ -876,9 +1220,9 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             doc.text("KTAYKIT IT INV - Inventory Report", 14, 15);
-            const tableData = localItemsList.map(i => [i.srNo, i.itemCode, i.itemName, i.department, i.location, i.status]);
+            const tableData = localItemsList.map(i => [i.srNo, i.itemCode, i.itemName, i.ipAddress || '-', i.department, i.location, i.status]);
             doc.autoTable({
-                head: [['Sr. No', 'Code', 'Item Name', 'Department', 'Location', 'Status']],
+                head: [['Sr. No', 'Code', 'Item Name', 'IP Address', 'Department', 'Location', 'Status']],
                 body: tableData,
                 startY: 25,
             });
