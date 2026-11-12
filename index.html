@@ -35,8 +35,7 @@
         <form id="loginForm" class="space-y-4">
             <div>
                 <label class="block text-sm font-semibold text-gray-700">Select or Type Username</label>
-                <!-- Both Datalist (Typing) & Select option -->
-                <input type="text" id="loginUsernameInput" list="usersDatalist" placeholder="Select or type username..." required class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium">
+                <input type="text" id="loginUsernameInput" list="usersDatalist" placeholder="Select or type username (e.g. admin)..." required class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium">
                 <datalist id="usersDatalist">
                     <option value="admin">Administrator</option>
                     <option value="assistant_edit">IT Assistant</option>
@@ -331,7 +330,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, onSnapshot, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // --- আপনার Firebase Config এখানে বসান ---
         const firebaseConfig = {
             apiKey: "AIzaSyADezVnAvMNfKi5QnMJ-uBUHBKpckXRtV0",
             authDomain: "kty-inv.firebaseapp.com",
@@ -429,7 +427,7 @@
             closeAddLocModal();
         }
 
-        // Fetch Users & Populate Datalist for typing or selecting
+        // Fetch Users & Populate Datalist
         onSnapshot(usersCollection, async (snapshot) => {
             usersList = [];
             snapshot.forEach(doc => usersList.push({ id: doc.id, ...doc.data() }));
@@ -458,15 +456,17 @@
             const inputVal = document.getElementById("loginUsernameInput").value.trim().toLowerCase();
             const password = document.getElementById("loginPassword").value;
 
-            // Find user from Firestore list or create a fallback temporary admin/user if typed manually
             let user = usersList.find(u => u.id === inputVal || u.name.toLowerCase() === inputVal);
             
             if (!user) {
-                // If user typed a custom name not in database, treat as assistant_edit by default or check if admin
                 if (inputVal === "admin" && password === "123456") {
                     user = { id: "admin", name: "Administrator", role: "admin", password: "123456" };
+                } else if (inputVal === "assistant_edit" && password === "123") {
+                    user = { id: "assistant_edit", name: "IT Assistant", role: "assistant_edit", password: "123" };
+                } else if (inputVal === "assistant_view" && password === "123") {
+                    user = { id: "assistant_view", name: "IT Assistant 1", role: "assistant_view", password: "123" };
                 } else {
-                    alert("User not found or incorrect password! Please use valid credentials.");
+                    alert("User not found or incorrect password! Please check username and password.");
                     return;
                 }
             }
@@ -569,7 +569,6 @@
             renderTable();
         }
 
-        // Form Submit with Proper Field Resetting (keeping Sr. No & Item Code auto updated)
         document.getElementById("inventoryForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             if (currentUser && currentUser.role === "assistant_view") return alert("View only mode!");
@@ -599,7 +598,6 @@
                         const docRef = await addDoc(inventoryCollection, itemData);
                         showQRCode(docRef.id, itemData.itemName, itemData.itemCode);
                         alert(translations[currentLang].alertSuccess);
-                        // Reset input fields except auto generated Sr. No & Item Code
                         document.getElementById("itemName").value = "";
                         document.getElementById("description").value = "";
                         document.getElementById("purchaseDate").value = "";
@@ -822,6 +820,10 @@
             qrcodeInstance.makeCode(scanTargetURL);
         }
 
+        window.closeScannedView = function() {
+            window.location.href = window.location.pathname;
+        }
+
         window.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const viewItemId = urlParams.get('viewItem');
@@ -837,4 +839,51 @@
                 detailsBox.innerHTML = `<p class="text-gray-500 text-center py-4">Fetching item details from cloud database...</p>`;
 
                 try {
-                    const docRef = doc(db
+                    const docSnap = await getDoc(doc(db, "items", viewItemId));
+                    if (docSnap.exists()) {
+                        const item = docSnap.data();
+                        detailsBox.innerHTML = `
+                            <div class="bg-gray-50 p-4 rounded-xl border space-y-2">
+                                <p><strong>Sr. No:</strong> ${item.srNo}</p>
+                                <p><strong>Item Code:</strong> <span class="font-mono text-blue-600">${item.itemCode}</span></p>
+                                <p><strong>Item Name:</strong> ${item.itemName}</p>
+                                <p><strong>Description:</strong> ${item.description || 'N/A'}</p>
+                                <p><strong>Purchase Date:</strong> ${item.purchaseDate || 'N/A'}</p>
+                                <p><strong>Warranty Date:</strong> ${item.warrantyDate || 'N/A'}</p>
+                                <p><strong>Department:</strong> ${item.department}</p>
+                                <p><strong>Location:</strong> ${item.location}</p>
+                                <p><strong>Status:</strong> <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-800 font-bold">${item.status}</span></p>
+                                <p><strong>Remarks:</strong> ${item.remarks}</p>
+                            </div>
+                        `;
+                    } else {
+                        detailsBox.innerHTML = `<p class="text-red-500 text-center py-4">Item not found in database!</p>`;
+                    }
+                } catch (err) {
+                    detailsBox.innerHTML = `<p class="text-red-500 text-center py-4">Error loading item details.</p>`;
+                }
+            }
+        });
+
+        window.exportToExcel = function() {
+            const worksheet = XLSX.utils.json_to_sheet(localItemsList);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Inventory");
+            XLSX.writeFile(workbook, "ktaykit_inventory.xlsx");
+        }
+
+        window.exportToPDF = function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("KTAYKIT IT INV - Inventory Report", 14, 15);
+            const tableData = localItemsList.map(i => [i.srNo, i.itemCode, i.itemName, i.department, i.location, i.status]);
+            doc.autoTable({
+                head: [['Sr. No', 'Code', 'Item Name', 'Department', 'Location', 'Status']],
+                body: tableData,
+                startY: 25,
+            });
+            doc.save("ktaykit_inventory.pdf");
+        }
+    </script>
+</body>
+</html>
