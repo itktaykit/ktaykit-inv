@@ -17,8 +17,8 @@
     <style>
         @media print {
             body * { visibility: hidden; }
-            #qrPanel, #qrPanel *, #reportModalContent, #reportModalContent * { visibility: visible; }
-            #qrPanel, #reportModalContent { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; background: white; }
+            #qrPanel, #qrPanel *, #reportModalContent, #reportModalContent *, #scannedItemView, #scannedItemView * { visibility: visible; }
+            #qrPanel, #reportModalContent, #scannedItemView { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; background: white; }
             .no-print { display: none !important; }
         }
     </style>
@@ -35,7 +35,6 @@
         <form id="loginForm" class="space-y-4">
             <div>
                 <label class="block text-sm font-semibold text-gray-700">Select or Type Username</label>
-                <!-- Blank username input field -->
                 <input type="text" id="loginUsernameInput" list="usersDatalist" placeholder="Type or select username..." required class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium" value="">
                 <datalist id="usersDatalist">
                     <option value="admin">Administrator</option>
@@ -45,7 +44,6 @@
             </div>
             <div>
                 <label class="block text-sm font-semibold text-gray-700">Password</label>
-                <!-- Blank password input field -->
                 <input type="password" id="loginPassword" placeholder="Enter password..." class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required value="">
             </div>
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow transition cursor-pointer">Login to System</button>
@@ -72,7 +70,7 @@
         </header>
 
         <!-- Admin & Action Control Bar -->
-        <div class="bg-white p-4 rounded-2xl shadow-md border flex flex-col md:flex-row justify-between items-center gap-3">
+        <div id="topActionControlBar" class="bg-white p-4 rounded-2xl shadow-md border flex flex-col md:flex-row justify-between items-center gap-3">
             <div id="adminControlBar" class="hidden flex items-center gap-2">
                 <span id="lblPendingAuth" class="text-amber-600 font-bold">⚠️ Pending Authorizations:</span>
                 <span id="pendingCount" class="bg-amber-100 text-amber-800 px-3 py-0.5 rounded-full text-xs font-bold">0</span>
@@ -96,7 +94,7 @@
         </div>
 
         <!-- Dashboard Metrics -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div id="dashboardMetricsArea" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div onclick="filterMainTable('ALL', 'ALL')" class="cursor-pointer hover:scale-[1.02] transition bg-gradient-to-br from-blue-500 to-blue-700 text-white p-5 rounded-2xl shadow-lg flex items-center justify-between">
                 <div>
                     <p id="lblDashTotal" class="text-xs uppercase font-bold tracking-wider text-blue-100">Total Items (Show All)</p>
@@ -128,7 +126,7 @@
         </div>
 
         <!-- Branch & Department Interactive Report Widgets -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div id="reportsWidgetsArea" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-100">
                 <div class="flex justify-between items-center mb-3 border-b pb-2">
                     <h3 id="lblDeptReportTitle" class="font-bold text-gray-800 flex items-center gap-2">🏢 Department Wise Report</h3>
@@ -157,7 +155,7 @@
             </div>
         </div>
 
-        <!-- Scanned Item View -->
+        <!-- Scanned Item View (Isolated Display) -->
         <div id="scannedItemView" class="hidden bg-white p-6 md:p-8 rounded-2xl shadow-xl border-t-4 border-blue-600 max-w-2xl mx-auto">
             <div class="flex justify-between items-center border-b pb-4 mb-4">
                 <h2 id="scanViewTitle" class="text-xl font-bold text-gray-800">Scanned Item Information</h2>
@@ -167,7 +165,7 @@
         </div>
 
         <!-- Main Content Area: QR Panel & Full Data Table -->
-        <div class="space-y-6">
+        <div id="mainTableContentArea" class="space-y-6">
             <div id="qrPanel" class="bg-white p-6 rounded-2xl shadow-md hidden flex flex-col items-center justify-center text-center border border-gray-100 max-w-xl mx-auto">
                 <p class="text-xs font-extrabold text-blue-600 uppercase tracking-wider mb-1">Property of Ktaykit Fast Food</p>
                 <h3 class="text-lg font-bold text-gray-800 mb-3" id="qrTitle">Generated QR Code</h3>
@@ -937,7 +935,7 @@
             document.getElementById("lblLocReportSub").innerText = data.locReportSub;
 
             document.getElementById("scanViewTitle").innerText = data.scanViewTitle;
-            document.getElementById("btnBackHome").innerText = data.btnBackHome;
+            document.getElementById("btnBackHome").innerText = data.backHome;
 
             document.getElementById("formTitle").innerText = data.formTitle;
             document.getElementById("lblSrNo").innerText = data.lblSrNo;
@@ -1302,6 +1300,12 @@
                 document.getElementById("loginScreen").classList.add("hidden");
                 document.getElementById("appContainer").classList.remove("hidden");
                 
+                // Hide all dashboard panels and table so ONLY scanned item shows
+                document.getElementById("topActionControlBar").classList.add("hidden");
+                document.getElementById("dashboardMetricsArea").classList.add("hidden");
+                document.getElementById("reportsWidgetsArea").classList.add("hidden");
+                document.getElementById("mainTableContentArea").classList.add("hidden");
+                
                 const scanCard = document.getElementById("scannedItemView");
                 const detailsBox = document.getElementById("scannedItemDetails");
                 scanCard.classList.remove("hidden");
@@ -1312,19 +1316,24 @@
                     if (docSnap.exists()) {
                         const item = docSnap.data();
                         detailsBox.innerHTML = `
-                            <div class="bg-gray-50 p-4 rounded-xl border space-y-2">
-                                <p><strong>Sr. No:</strong> ${item.srNo}</p>
-                                <p><strong>Item Code:</strong> <span class="font-mono text-blue-600">${item.itemCode}</span></p>
-                                <p><strong>Item Name:</strong> ${item.itemName}</p>
-                                <p><strong>IP Address:</strong> <span class="font-mono">${item.ipAddress || 'N/A'}</span></p>
-                                <p><strong>MAC Address:</strong> <span class="font-mono">${item.macAddress || 'N/A'}</span></p>
-                                <p><strong>Description:</strong> ${item.description || 'N/A'}</p>
-                                <p><strong>Purchase Date:</strong> ${item.purchaseDate || 'N/A'}</p>
-                                <p><strong>Warranty Date:</strong> ${item.warrantyDate || 'N/A'}</p>
-                                <p><strong>Department:</strong> ${item.department}</p>
-                                <p><strong>Location:</strong> ${item.location}</p>
-                                <p><strong>Status:</strong> <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-800 font-bold">${item.status}</span></p>
-                                <p><strong>Remarks:</strong> ${item.remarks}</p>
+                            <div class="bg-gray-50 p-6 rounded-xl border space-y-3">
+                                <div class="text-center pb-3 border-b">
+                                    <p class="text-xs font-bold text-blue-600 uppercase tracking-wider">Property of Ktaykit Fast Food</p>
+                                    <h3 class="text-2xl font-extrabold text-gray-900 mt-1">${item.itemName}</h3>
+                                    <p class="text-sm font-mono text-indigo-600 font-semibold">${item.itemCode}</p>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm pt-2">
+                                    <p><strong>Sr. No:</strong> ${item.srNo}</p>
+                                    <p><strong>Status:</strong> <span class="px-2.5 py-0.5 rounded-full text-xs bg-green-100 text-green-800 font-bold">${item.status}</span></p>
+                                    <p><strong>IP Address:</strong> <span class="font-mono">${item.ipAddress || 'N/A'}</span></p>
+                                    <p><strong>MAC Address:</strong> <span class="font-mono">${item.macAddress || 'N/A'}</span></p>
+                                    <p><strong>Department:</strong> ${item.department}</p>
+                                    <p><strong>Location:</strong> ${item.location}</p>
+                                    <p><strong>Purchase Date:</strong> ${item.purchaseDate || 'N/A'}</p>
+                                    <p><strong>Warranty Date:</strong> ${item.warrantyDate || 'N/A'}</p>
+                                </div>
+                                <p class="pt-2 border-t text-sm"><strong>Description:</strong> ${item.description || 'N/A'}</p>
+                                <p class="text-sm"><strong>Remarks:</strong> ${item.remarks}</p>
                             </div>
                         `;
                     } else {
