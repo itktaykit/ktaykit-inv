@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- QRCode.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- SheetJS (Excel Export) -->
+    <!-- SheetJS (Excel Export & Import) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- jsPDF & jsPDF-AutoTable -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -35,7 +35,8 @@
         <form id="loginForm" class="space-y-4">
             <div>
                 <label class="block text-sm font-semibold text-gray-700">Select or Type Username</label>
-                <input type="text" id="loginUsernameInput" list="usersDatalist" placeholder="Select or type username (e.g. admin)..." required class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium">
+                <!-- Blank username input field -->
+                <input type="text" id="loginUsernameInput" list="usersDatalist" placeholder="Type or select username..." required class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium" value="">
                 <datalist id="usersDatalist">
                     <option value="admin">Administrator</option>
                     <option value="assistant_edit">IT Assistant</option>
@@ -44,7 +45,8 @@
             </div>
             <div>
                 <label class="block text-sm font-semibold text-gray-700">Password</label>
-                <input type="password" id="loginPassword" placeholder="Enter password (Admin is 123456)" class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required>
+                <!-- Blank password input field -->
+                <input type="password" id="loginPassword" placeholder="Enter password..." class="w-full mt-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required value="">
             </div>
             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow transition cursor-pointer">Login to System</button>
         </form>
@@ -77,9 +79,13 @@
                 <button onclick="openApprovalModal()" id="btnReviewReq" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow cursor-pointer ml-2">Review Requests</button>
             </div>
             
-            <div>
+            <div class="flex items-center gap-2">
                 <button onclick="openItemEntryModal()" id="btnAddItemPopup" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow cursor-pointer flex items-center gap-2">
                     ➕ Add New Item
+                </button>
+                <input type="file" id="importFileInput" accept=".xlsx, .xls, .json" class="hidden" onchange="handleFileImport(event)">
+                <button onclick="document.getElementById('importFileInput').click()" id="btnImport" class="bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow cursor-pointer flex items-center gap-1.5">
+                    📂 Import File
                 </button>
             </div>
 
@@ -180,7 +186,7 @@
                     
                     <!-- Search Input Bar -->
                     <div class="w-full lg:w-72">
-                        <input type="text" id="searchInput" oninput="renderTable()" placeholder="🔍 Search by Item Code or Name..." class="w-full p-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="text" id="searchInput" placeholder="🔍 Search by Item Code or Name..." class="w-full p-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
 
                     <div class="flex flex-wrap gap-2">
@@ -472,7 +478,7 @@
                 dir: "ltr", switcher: "العربية", subtitle: "Property of Ktaykit Fast Food",
                 headerTitle: "KTAYKIT IT INV", logout: "Logout",
                 pendingAuth: "⚠️ Pending Authorizations:", reviewReq: "Review Requests",
-                addUser: "➕ Add User", changePass: "🔑 Change Password", btnAddItemPopup: "➕ Add New Item",
+                addUser: "➕ Add User", changePass: "🔑 Change Password", btnAddItemPopup: "➕ Add New Item", btnImport: "📂 Import File",
                 dashTotal: "Total Items (Show All)", dashActive: "Active Items", dashMaint: "Maintenance", dashDamage: "Damaged / Inactive",
                 deptReportTitle: "🏢 Department Wise Report", selectDeptRep: "Select & View Report", deptReportSub: "Click any department below or use the button above to inspect items:",
                 locReportTitle: "📍 Location / Branch Report", branchAll: "Branch Wise (All)", chooseLoc: "Choose Location", locReportSub: "Click \"Branch Wise (All)\" for full list or choose a specific location:",
@@ -493,7 +499,7 @@
                 dir: "rtl", switcher: "English", subtitle: "ملك لـ كتيكت للوجبات السريعة",
                 headerTitle: "نظام إدارة تكنولوجيا المعلومات - كتيكت", logout: "تسجيل الخروج",
                 pendingAuth: "⚠️ الموافقات المعلقة:", reviewReq: "مراجعة الطلبات",
-                addUser: "➕ إضافة مستخدم", changePass: "🔑 تغيير كلمة المرور", btnAddItemPopup: "➕ إضافة مادة جديدة",
+                addUser: "➕ إضافة مستخدم", changePass: "🔑 تغيير كلمة المرور", btnAddItemPopup: "➕ إضافة مادة جديدة", btnImport: "📂 استيراد ملف",
                 dashTotal: "إجمالي المواد (عرض الكل)", dashActive: "المواد النشطة", dashMaint: "قيد الصيانة", dashDamage: "التالفة / غير النشطة",
                 deptReportTitle: "🏢 تقرير حسب الأقسام", selectDeptRep: "اختر وعرض التقرير", deptReportSub: "انقر على أي قسم أدناه أو استخدم الزر أعلاه لفحص المواد:",
                 locReportTitle: "📍 تقرير حسب المواقع / الفروع", branchAll: "حسب الفروع (الكل)", chooseLoc: "اختر الموقع", locReportSub: "انقر على \"حسب الفروع (الكل)\" للقائمة الكاملة أو اختر موقعاً محدداً:",
@@ -549,6 +555,84 @@
         }
         window.closeItemEntryModal = function() {
             document.getElementById("itemEntryModal").classList.add("hidden");
+        }
+
+        window.handleFileImport = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            const fileName = file.name.toLowerCase();
+
+            if (fileName.endsWith('.json')) {
+                reader.onload = async function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (Array.isArray(importedData)) {
+                            for (let item of importedData) {
+                                await addDoc(inventoryCollection, {
+                                    srNo: item.srNo || String(localItemsList.length + 1).padStart(4, '0'),
+                                    itemCode: item.itemCode || `KTY-ITP-${1100 + localItemsList.length + 1}`,
+                                    itemName: item.itemName || item.Name || "Imported Item",
+                                    ipAddress: item.ipAddress || item.IP || '-',
+                                    macAddress: item.macAddress || item.MAC || '-',
+                                    description: item.description || '-',
+                                    purchaseDate: item.purchaseDate || '',
+                                    warrantyDate: item.warrantyDate || '',
+                                    department: item.department || departmentsList[0],
+                                    location: item.location || locationsList[0],
+                                    status: item.status || 'Active',
+                                    remarks: item.remarks || '-',
+                                    timestamp: new Date()
+                                });
+                            }
+                            alert("JSON data imported successfully!");
+                        } else {
+                            alert("Invalid JSON format. Expected an array of items.");
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert("Error parsing JSON file.");
+                    }
+                    event.target.value = "";
+                };
+                reader.readAsText(file);
+            } else {
+                reader.onload = async function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const jsonSheetData = XLSX.utils.sheet_to_json(worksheet);
+
+                        for (let item of jsonSheetData) {
+                            let nextSr = String(localItemsList.length + 1).padStart(4, '0');
+                            await addDoc(inventoryCollection, {
+                                srNo: item['Sr. No'] || item.srNo || nextSr,
+                                itemCode: item['Code'] || item.itemCode || `KTY-ITP-${1100 + localItemsList.length + 1}`,
+                                itemName: item['Item Name'] || item.itemName || "Imported Item",
+                                ipAddress: item['IP Address'] || item.ipAddress || '-',
+                                macAddress: item['MAC Address'] || item.macAddress || '-',
+                                description: item['Description'] || item.description || '-',
+                                purchaseDate: item['Purchase Date'] || item.purchaseDate || '',
+                                warrantyDate: item['Warranty Date'] || item.warrantyDate || '',
+                                department: item['Department'] || item.department || departmentsList[0],
+                                location: item['Location'] || item.location || locationsList[0],
+                                status: item['Status'] || item.status || 'Active',
+                                remarks: item['Remarks'] || item.remarks || '-',
+                                timestamp: new Date()
+                            });
+                        }
+                        alert("Excel file imported successfully!");
+                    } catch (err) {
+                        console.error(err);
+                        alert("Error reading Excel file.");
+                    }
+                    event.target.value = "";
+                };
+                reader.readAsArrayBuffer(file);
+            }
         }
 
         window.openFilterReportModal = function(mode, preselectVal = "ALL") {
@@ -652,7 +736,6 @@
             });
         }
 
-        // Export Modal Report to Excel
         window.exportModalToExcel = function() {
             const worksheet = XLSX.utils.json_to_sheet(currentFilteredReportList);
             const workbook = XLSX.utils.book_new();
@@ -660,7 +743,6 @@
             XLSX.writeFile(workbook, "ktaykit_filtered_report.xlsx");
         }
 
-        // Export Modal Report to PDF
         window.exportModalToPDF = function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -838,6 +920,7 @@
             document.getElementById("btnAddUser").innerText = data.addUser;
             document.getElementById("btnChangePass").innerText = data.changePass;
             document.getElementById("btnAddItemPopup").innerText = data.btnAddItemPopup;
+            document.getElementById("btnImport").innerText = data.btnImport;
 
             document.getElementById("lblDashTotal").innerText = data.dashTotal;
             document.getElementById("lblDashActive").innerText = data.dashActive;
@@ -854,7 +937,7 @@
             document.getElementById("lblLocReportSub").innerText = data.locReportSub;
 
             document.getElementById("scanViewTitle").innerText = data.scanViewTitle;
-            document.getElementById("btnBackHome").innerText = data.backHome;
+            document.getElementById("btnBackHome").innerText = data.btnBackHome;
 
             document.getElementById("formTitle").innerText = data.formTitle;
             document.getElementById("lblSrNo").innerText = data.lblSrNo;
@@ -1029,6 +1112,10 @@
             document.getElementById("itemCode").value = `KTY-ITP-${1100 + nextNum}`;
         }
 
+        document.getElementById("searchInput").addEventListener("input", () => {
+            renderTable();
+        });
+
         function renderTable() {
             const tableBody = document.getElementById("inventoryTableBody");
             const searchInputVal = document.getElementById("searchInput").value.trim().toLowerCase();
@@ -1039,7 +1126,8 @@
                 displayList = localItemsList.filter(item => 
                     (item.itemCode && item.itemCode.toLowerCase().includes(searchInputVal)) || 
                     (item.itemName && item.itemName.toLowerCase().includes(searchInputVal)) ||
-                    (item.srNo && item.srNo.toLowerCase().includes(searchInputVal))
+                    (item.srNo && item.srNo.toLowerCase().includes(searchInputVal)) ||
+                    (item.ipAddress && item.ipAddress.toLowerCase().includes(searchInputVal))
                 );
             }
 
@@ -1063,7 +1151,6 @@
                 const btnEditText = translations[currentLang].btnEdit;
                 const btnDelText = translations[currentLang].btnDel;
 
-                // View, Edit, Delete options at the end of each row
                 let actionButtons = `<button class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1.5 rounded-lg shadow cursor-pointer scan-qr-btn" data-id="${item.id}" data-name="${item.itemName}" data-code="${item.itemCode}">${btnViewText}</button>`;
 
                 if (currentUser && currentUser.role !== "assistant_view") {
