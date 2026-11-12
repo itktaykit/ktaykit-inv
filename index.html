@@ -77,7 +77,6 @@
                 <button onclick="openApprovalModal()" id="btnReviewReq" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow cursor-pointer ml-2">Review Requests</button>
             </div>
             
-            <!-- Add New Item Button (Popup Trigger) -->
             <div>
                 <button onclick="openItemEntryModal()" id="btnAddItemPopup" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow cursor-pointer flex items-center gap-2">
                     ➕ Add New Item
@@ -161,7 +160,7 @@
             <div id="scannedItemDetails" class="space-y-3 text-gray-700"></div>
         </div>
 
-        <!-- Main Content Area: QR Panel & Full Data Table spanning the page -->
+        <!-- Main Content Area: QR Panel & Full Data Table -->
         <div class="space-y-6">
             <div id="qrPanel" class="bg-white p-6 rounded-2xl shadow-md hidden flex flex-col items-center justify-center text-center border border-gray-100 max-w-xl mx-auto">
                 <p class="text-xs font-extrabold text-blue-600 uppercase tracking-wider mb-1">Property of Ktaykit Fast Food</p>
@@ -171,13 +170,19 @@
                 <button id="btnPrint" onclick="window.print()" class="no-print bg-gray-800 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-gray-900 cursor-pointer shadow">Print QR Label</button>
             </div>
 
-            <!-- Full Width Inventory Table -->
+            <!-- Full Width Inventory Table with Search Bar -->
             <div class="bg-white p-6 rounded-2xl shadow-md overflow-x-auto border border-gray-100">
-                <div class="flex flex-col sm:flex-row justify-between items-center border-b pb-4 mb-4 gap-3">
+                <div class="flex flex-col lg:flex-row justify-between items-center border-b pb-4 mb-4 gap-3">
                     <div>
                         <h2 id="tableTitle" class="text-xl font-bold text-gray-800">Stored Inventory Items</h2>
                         <span id="activeFilterBadge" class="hidden text-xs bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full font-semibold mt-1 inline-block"></span>
                     </div>
+                    
+                    <!-- Search Input Bar -->
+                    <div class="w-full lg:w-72">
+                        <input type="text" id="searchInput" oninput="renderTable()" placeholder="🔍 Search by Item Code or Name..." class="w-full p-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+
                     <div class="flex flex-wrap gap-2">
                         <button onclick="exportToExcel()" id="btnExcel" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow cursor-pointer flex items-center gap-1.5">📊 Export Excel</button>
                         <button onclick="exportToPDF()" id="btnPDF" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow cursor-pointer flex items-center gap-1.5">📄 Export PDF</button>
@@ -205,7 +210,7 @@
         </div>
     </div>
 
-    <!-- ITEM ENTRY MODAL (POPUP FORM) WITH IP & MAC -->
+    <!-- ITEM ENTRY MODAL (POPUP FORM) -->
     <div id="itemEntryModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-white max-w-lg w-full p-6 md:p-8 rounded-2xl shadow-2xl space-y-4 my-8 relative">
             <div class="flex justify-between items-center border-b pb-3">
@@ -231,7 +236,6 @@
                     <input type="text" id="itemName" required placeholder="e.g. Dell Laptop" class="w-full mt-1 p-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm">
                 </div>
 
-                <!-- IP Address and MAC Address fields -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label id="lblIpAddress" class="block text-xs font-semibold text-gray-700">IP Address</label>
@@ -301,7 +305,7 @@
         </div>
     </div>
 
-    <!-- INTERACTIVE REPORT MODAL -->
+    <!-- INTERACTIVE REPORT MODAL WITH EXCEL & PDF EXPORT -->
     <div id="filterReportModal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
         <div id="reportModalContent" class="bg-white max-w-5xl w-full p-6 rounded-2xl shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center border-b pb-3">
@@ -309,8 +313,10 @@
                     <h3 id="reportModalTitle" class="text-xl font-bold text-gray-800">Inventory Report</h3>
                     <p class="text-xs text-gray-500">Property of Ktaykit Fast Food</p>
                 </div>
-                <div class="flex items-center gap-2 no-print">
-                    <button onclick="window.print()" id="btnPrintRep" class="bg-gray-800 hover:bg-gray-900 text-white text-xs font-semibold px-3.5 py-2 rounded-xl cursor-pointer">🖨️ Print Report</button>
+                <div class="flex flex-wrap items-center gap-2 no-print">
+                    <button onclick="exportModalToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-2 rounded-xl cursor-pointer">📊 Export Excel</button>
+                    <button onclick="exportModalToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-3 py-2 rounded-xl cursor-pointer">📄 Export PDF</button>
+                    <button onclick="window.print()" id="btnPrintRep" class="bg-gray-800 hover:bg-gray-900 text-white text-xs font-semibold px-3.5 py-2 rounded-xl cursor-pointer">🖨️ Print</button>
                     <button onclick="closeFilterReportModal()" id="btnCloseRep" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-3 py-1.5 rounded-xl text-sm cursor-pointer">&times; Close</button>
                 </div>
             </div>
@@ -477,7 +483,7 @@
                 lblRemarks: "Remarks", optActive: "Active", optInactive: "Inactive", optMaint: "Maintenance", optDamage: "Damage",
                 btnSubmit: "Add Item & QR", btnUpdate: "Update Item", btnCancel: "Cancel", tableTitle: "Stored Inventory Items",
                 thSr: "Sr. No", thCode: "Code", thName: "Item Name", thIP: "IP / MAC", thDates: "Purchase / Warranty", thDept: "Dept / Loc",
-                thStatus: "Status", thRemarks: "Remarks", thAction: "Actions", btnAction: "QR", btnEdit: "Edit", btnDel: "Delete",
+                thStatus: "Status", thRemarks: "Remarks", thAction: "Actions", btnView: "View", btnEdit: "Edit", btnDel: "Delete",
                 qrTitle: "QR Code", btnPrint: "Print QR Label", btnExcel: "📊 Export Excel", btnPDF: "📄 Export PDF",
                 alertSuccess: "Item Successfully Added!", alertRequestSent: "Request sent to Admin!",
                 itemsFound: "Items Found",
@@ -498,7 +504,7 @@
                 lblRemarks: "الملاحظات", optActive: "نشط", optInactive: "غير نشط", optMaint: "صيانة", optDamage: "تالف",
                 btnSubmit: "إضافة المادة ورمز QR", btnUpdate: "تحديث المادة", btnCancel: "إلغاء", tableTitle: "المواد المخزنة في المستودع",
                 thSr: "الرقم", thCode: "الرمز", thName: "اسم المادة", thIP: "IP / MAC", thDates: "الشراء / الضمان", thDept: "القسم / الموقع",
-                thStatus: "الحالة", thRemarks: "الملاحظات", thAction: "الإجراءات", btnAction: "QR", btnEdit: "تعديل", btnDel: "حذف",
+                thStatus: "الحالة", thRemarks: "الملاحظات", thAction: "الإجراءات", btnView: "عرض", btnEdit: "تعديل", btnDel: "حذف",
                 qrTitle: "رمز QR", btnPrint: "طباعة ملصق QR", btnExcel: "📊 تصدير إكسل", btnPDF: "📄 تصدير PDF",
                 alertSuccess: "تم إضافة المادة بنجاح!", alertRequestSent: "تم إرسال الطلب إلى المسؤول!",
                 itemsFound: "مادة موجودة",
@@ -510,6 +516,7 @@
         let localItemsList = [];
         let pendingRequestsList = [];
         let currentReportMode = "location";
+        let currentFilteredReportList = [];
 
         function updateDropdowns() {
             const deptSelect = document.getElementById("department");
@@ -534,7 +541,6 @@
             if (locationsList.includes(currentLoc)) locSelect.value = currentLoc;
         }
 
-        // Popup Modal Controls
         window.openItemEntryModal = function() {
             document.getElementById("itemEntryModal").classList.remove("hidden");
             if (!document.getElementById("editingDocId").value) {
@@ -613,6 +619,7 @@
                 filtered = filtered.filter(item => item.department === selectVal);
             }
 
+            currentFilteredReportList = filtered;
             document.getElementById("reportItemCountBadge").innerText = `${filtered.length} ${translations[currentLang].itemsFound}`;
             tbody.innerHTML = "";
 
@@ -643,6 +650,28 @@
                     </tr>
                 `;
             });
+        }
+
+        // Export Modal Report to Excel
+        window.exportModalToExcel = function() {
+            const worksheet = XLSX.utils.json_to_sheet(currentFilteredReportList);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
+            XLSX.writeFile(workbook, "ktaykit_filtered_report.xlsx");
+        }
+
+        // Export Modal Report to PDF
+        window.exportModalToPDF = function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("KTAYKIT IT INV - Filtered Report", 14, 15);
+            const tableData = currentFilteredReportList.map(i => [i.srNo, i.itemCode, i.itemName, i.ipAddress || '-', i.department, i.location, i.status]);
+            doc.autoTable({
+                head: [['Sr. No', 'Code', 'Item Name', 'IP Address', 'Department', 'Location', 'Status']],
+                body: tableData,
+                startY: 25,
+            });
+            doc.save("ktaykit_filtered_report.pdf");
         }
 
         window.openAddDepartmentModal = function() { document.getElementById("addDeptModal").classList.remove("hidden"); document.getElementById("customDeptInput").focus(); }
@@ -902,7 +931,6 @@
                         showQRCode(docRef.id, itemData.itemName, itemData.itemCode);
                         alert(translations[currentLang].alertSuccess);
                         
-                        // Clear fields except Sr. No and Item Code
                         document.getElementById("itemName").value = "";
                         document.getElementById("ipAddress").value = "";
                         document.getElementById("macAddress").value = "";
@@ -1003,12 +1031,24 @@
 
         function renderTable() {
             const tableBody = document.getElementById("inventoryTableBody");
+            const searchInputVal = document.getElementById("searchInput").value.trim().toLowerCase();
             tableBody.innerHTML = "";
-            if (localItemsList.length === 0) {
+
+            let displayList = localItemsList;
+            if (searchInputVal) {
+                displayList = localItemsList.filter(item => 
+                    (item.itemCode && item.itemCode.toLowerCase().includes(searchInputVal)) || 
+                    (item.itemName && item.itemName.toLowerCase().includes(searchInputVal)) ||
+                    (item.srNo && item.srNo.toLowerCase().includes(searchInputVal))
+                );
+            }
+
+            if (displayList.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-gray-400">${currentLang === "ar" ? "لا توجد مواد مخزنة." : "No items found."}</td></tr>`;
                 return;
             }
-            localItemsList.forEach((item) => {
+
+            displayList.forEach((item) => {
                 const row = document.createElement("tr");
                 row.className = "hover:bg-gray-50 transition border-b border-gray-100";
                 
@@ -1019,11 +1059,12 @@
                 else if (item.status === "Maintenance") { statusColor = "bg-yellow-100 text-yellow-800"; statusText = translations[currentLang].statusMaintText; }
                 else if (item.status === "Damage") { statusColor = "bg-rose-100 text-rose-900 font-bold"; statusText = translations[currentLang].statusDamageText; }
 
-                const btnActionText = translations[currentLang].btnAction;
+                const btnViewText = translations[currentLang].btnView;
                 const btnEditText = translations[currentLang].btnEdit;
                 const btnDelText = translations[currentLang].btnDel;
 
-                let actionButtons = `<button class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1.5 rounded-lg shadow cursor-pointer scan-qr-btn" data-id="${item.id}" data-name="${item.itemName}" data-code="${item.itemCode}">${btnActionText}</button>`;
+                // View, Edit, Delete options at the end of each row
+                let actionButtons = `<button class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2.5 py-1.5 rounded-lg shadow cursor-pointer scan-qr-btn" data-id="${item.id}" data-name="${item.itemName}" data-code="${item.itemCode}">${btnViewText}</button>`;
 
                 if (currentUser && currentUser.role !== "assistant_view") {
                     actionButtons += `<button class="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2.5 py-1.5 rounded-lg shadow cursor-pointer edit-btn ml-1" data-id="${item.id}">${btnEditText}</button>`;
@@ -1122,7 +1163,6 @@
             document.getElementById("btnSubmit").innerText = currentUser && currentUser.role === "admin" ? (currentLang === "ar" ? "تحديث المادة" : "Update Item") : (currentLang === "ar" ? "إرسال للموافقة" : "Submit Update for Approval");
             document.getElementById("btnCancelEdit").classList.remove("hidden");
             
-            // Open modal to show edit form
             openItemEntryModal();
         }
 
